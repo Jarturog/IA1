@@ -57,12 +57,12 @@ class Estat:
     
     def calcHeuristica(self) -> int:
         """
+        h = suma de todas las h_casilla
         h_casilla = para cada 3 casillas adyacentas (8 direcciones):
             +0 por cada casilla ganadora,
             +1 por cada casilla libre,
             +2 por cada casilla perdedora
             por lo tanto máximo es (1+8*3)*2 para cada casilla y 0 como mínimo
-        h = suma de todas las h_casilla
         """
         taulell = self.taulell
         filas = len(taulell)
@@ -145,15 +145,15 @@ class Estat:
         for i in range(filas):
             columnas = len(taulell[i])
             for j in range(columnas):
-                if taulell[i][j] == CASELLA_JUGADOR:
-                    # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
-                    for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                        # Comprobar si es posible encontrar N_CASELLAS_PER_GUANYAR casillas en esa dirección
-                        if (0 <= i + (N_CASELLAS_PER_GUANYAR - 1) * di < filas and
-                            0 <= j + (N_CASELLAS_PER_GUANYAR - 1) * dj < columnas):
-                            # Utilizar la función auxiliar para verificar si hay una línea ganadora en esa dirección
-                            if check_direccio(i, j, di, dj):
-                                return True  # Si se encuentra una línea ganadora, retornar True
+                if taulell[i][j] != CASELLA_JUGADOR:
+                    continue
+                # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
+                for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
+                    # Comprobar si es posible encontrar N_CASELLAS_PER_GUANYAR casillas en esa dirección
+                    if (0 <= i + (N_CASELLAS_PER_GUANYAR - 1) * di < filas and
+                        0 <= j + (N_CASELLAS_PER_GUANYAR - 1) * dj < columnas and
+                        check_direccio(i, j, di, dj)): # Utilizar la función auxiliar para verificar si hay una línea ganadora en esa dirección
+                        return True  # Si se encuentra una línea ganadora, retornar True
         return False  # Si no se encuentra ninguna línea ganadora en ninguna dirección, retornar False
 
     def genera_fill(self) -> list:
