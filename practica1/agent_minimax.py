@@ -16,7 +16,7 @@ class AgentMiniMaxAlfaBeta(Agent):
     ) -> entorn.Accio | tuple[entorn.Accio, object]:
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
-        estat_inicial = Estat(mida, taulell)
+        estat_inicial = Estat(mida, taulell,0)
         if self.__accions is None:
             self.cerca(estat_inicial)
         if len(self.__accions) <= 0:

@@ -31,7 +31,7 @@ class Agent(joc.Agent):
 
 class Estat:
     
-    def __init__(self, mida, taulell, pes, accions_previes=None):
+    def __init__(self, mida, taulell, pes=0, accions_previes=None):
         if accions_previes is None:
             accions_previes = []
         self.accions_previes = accions_previes
@@ -110,15 +110,15 @@ class Estat:
         if mida is None or not isinstance(mida, tuple) or len(mida) != 2:
             return False, "La mida hauria de ser una tupla de dos enters: " + mida
         if taulell is None or not isinstance(taulell, tuple):
-            return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+            return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
         if len(taulell) != mida[0]:
-            return False, "La taulell i la mida no encaixen: " + len(taulell) + " != " + str(mida[0])
+            return False, "El taulell i la mida no encaixen: " + len(taulell) + " != " + str(mida[0])
         for i in taulell:
-            if i is None or len(i) != mida[0]:
-                return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+            if i is None or len(i) != mida[1]:
+                return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
             for j in taulell[i]:
                 if j is None:
-                    return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+                    return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
         return True, None
 
     def es_meta(self) -> bool:
