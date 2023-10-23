@@ -10,7 +10,6 @@ from practica1 import joc
 from practica1.entorn import Accio, SENSOR, TipusCasella # no sé si TipusCasella se puede importar
 
 CASILLA_GANADORA = TipusCasella.CARA
-CASILLA_LIBRE = TipusCasella.LLIURE
 NUM_CASILLAS_PARA_GANAR = 4
 
 class Agent(joc.Agent):
@@ -73,7 +72,7 @@ class Estat:
         def check_casella(i, j):
             h_casilla = 0
             casella = taulell[i][j]
-            if casella == CASILLA_LIBRE:
+            if casella == TipusCasella.LLIURE:
                 h_casilla += 1
             elif casella != CASILLA_GANADORA: # per tant és casella perdedora
                 h_casilla += 2
@@ -86,7 +85,7 @@ class Estat:
                     if ind1 < 0 or ind2 < 0 or ind2 >= filas or ind1 >= columnas:
                         continue
                     casella = taulell[ind1][ind2]
-                    if casella == CASILLA_LIBRE:
+                    if casella == TipusCasella.LLIURE:
                         h_casilla += 1
                     elif casella != CASILLA_GANADORA: # per tant és casella perdedora
                         h_casilla += 2
@@ -159,7 +158,7 @@ class Estat:
         for i in range(filas):
             columnas = len(self.taulell[i])
             for j in range(columnas):
-                if self.taulell[i][j] == CASILLA_LIBRE:
+                if self.taulell[i][j] == TipusCasella.LLIURE:
                     taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                     taulell[i][j] = CASILLA_GANADORA #.posar(CASILLA_GANADORA)
                     acc = self.accions_previes[:]
