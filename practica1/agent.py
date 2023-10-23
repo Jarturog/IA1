@@ -59,9 +59,9 @@ class Estat:
         """
         h = suma de todas las h_casilla
         h_casilla = para cada 3 casillas adyacentas (8 direcciones):
-            +0 por cada casilla ganadora,
+            +0 por cada casilla del jugador,
             +1 por cada casilla libre,
-            +2 por cada casilla perdedora
+            +2 por cada casilla del contrincante
             por lo tanto máximo es (1+8*3)*2 para cada casilla y 0 como mínimo
         """
         taulell = self.taulell
