@@ -121,6 +121,14 @@ class Estat:
             for j in taulell[i]:
                 if j is None:
                     return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+                if j is not TipusCasella:
+                    return False, "Error casella"
+                if j is TipusCasella.CARA:
+                    nCara += 1
+                elif j is TipusCasella.CREU:
+                    nCreu += 1
+        if (nCreu - nCara) not in {-1, 0, 1}:
+            return False, "Error"
         return True, None
 
     def es_meta(self) -> bool:
