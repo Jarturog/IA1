@@ -105,6 +105,8 @@ class Estat:
         Returns:
             Missatge d'error o None en cas de que sigui legal
         """
+        nCreu = 0
+        nCara = 0
         taulell = self.taulell
         mida = self.mida
         if mida is None or not isinstance(mida, tuple) or len(mida) != 2:
