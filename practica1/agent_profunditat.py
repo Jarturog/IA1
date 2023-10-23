@@ -38,6 +38,6 @@ class AgentProfunditat(Agent):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue
-                ja_plantejat = any(s.__eq__(sObert) for sObert in self.__oberts)
-                if not ja_plantejat:
+                ja_descobert = any(s.__eq__(sObert) for sObert in self.__oberts)
+                if not ja_descobert:
                     self.__oberts.append(s)
