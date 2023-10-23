@@ -2,7 +2,7 @@ import sys, platform
 from practica1 import agent, joc
 P = platform.system()
 if P == 'Windows': sys.path.append('C:\\Users\\jartu\\Documents\\GitHub\\IA1') # path de arturo
-elif P == 'Darwin': pass#sys.path.append('C:\\Users\\jartu\\Documents\\GitHub\\IA1') # path de marta
+
 
 
 
