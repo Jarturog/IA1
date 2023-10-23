@@ -9,8 +9,8 @@ from ia_2022 import entorn
 from practica1 import joc
 from practica1.entorn import Accio, SENSOR, TipusCasella # no sé si TipusCasella se puede importar
 
-CASILLA_GANADORA = TipusCasella.CARA
-NUM_CASILLAS_PARA_GANAR = 4
+TIPUS_CASELLA_JUGANT = TipusCasella.CARA
+N_CASELLAS_PER_GUANYAR = 4
 
 class Agent(joc.Agent):
     
@@ -74,20 +74,20 @@ class Estat:
             casella = taulell[i][j]
             if casella == TipusCasella.LLIURE:
                 h_casilla += 1
-            elif casella != CASILLA_GANADORA: # per tant és casella perdedora
+            elif casella != TIPUS_CASELLA_JUGANT: # per tant és casella perdedora
                 h_casilla += 2
 
             direcciones = [(di, dj) for di in [-1, 0, 1] for dj in [-1, 0, 1] if di != 0 or dj != 0]
 
             for di, dj in direcciones:
-                for k in range(1, NUM_CASILLAS_PARA_GANAR):
+                for k in range(1, N_CASELLAS_PER_GUANYAR):
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     if ind1 < 0 or ind2 < 0 or ind2 >= filas or ind1 >= columnas:
                         continue
                     casella = taulell[ind1][ind2]
                     if casella == TipusCasella.LLIURE:
                         h_casilla += 1
-                    elif casella != CASILLA_GANADORA: # per tant és casella perdedora
+                    elif casella != TIPUS_CASELLA_JUGANT: # per tant és casella perdedora
                         h_casilla += 2
             return h_casilla
 
@@ -124,8 +124,8 @@ class Estat:
     def es_meta(self) -> bool:
         taulell = self.taulell
         def check_direccio(i, j, di, dj):
-            for k in range(NUM_CASILLAS_PARA_GANAR):
-                if taulell[i + (k * di)][j + (k * dj)] != CASILLA_GANADORA:
+            for k in range(N_CASELLAS_PER_GUANYAR):
+                if taulell[i + (k * di)][j + (k * dj)] != TIPUS_CASELLA_JUGANT:
                     return False
             return True
         # Iterar a través de todas las celdas de la matriz
@@ -133,12 +133,12 @@ class Estat:
         for i in range(filas):
             columnas = len(taulell[i])
             for j in range(columnas):
-                if taulell[i][j] == CASILLA_GANADORA:
+                if taulell[i][j] == TIPUS_CASELLA_JUGANT:
                     # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
                     for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                        # Comprobar si es posible encontrar NUM_CASILLAS_PARA_GANAR casillas en esa dirección
-                        if (0 <= i + (NUM_CASILLAS_PARA_GANAR - 1) * di < filas and
-                            0 <= j + (NUM_CASILLAS_PARA_GANAR - 1) * dj < columnas):
+                        # Comprobar si es posible encontrar N_CASELLAS_PER_GUANYAR casillas en esa dirección
+                        if (0 <= i + (N_CASELLAS_PER_GUANYAR - 1) * di < filas and
+                            0 <= j + (N_CASELLAS_PER_GUANYAR - 1) * dj < columnas):
                             # Utilizar la función auxiliar para verificar si hay una línea ganadora en esa dirección
                             if check_direccio(i, j, di, dj):
                                 return True  # Si se encuentra una línea ganadora, retornar True
@@ -160,7 +160,7 @@ class Estat:
             for j in range(columnas):
                 if self.taulell[i][j] == TipusCasella.LLIURE:
                     taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
-                    taulell[i][j] = CASILLA_GANADORA #.posar(CASILLA_GANADORA)
+                    taulell[i][j] = TIPUS_CASELLA_JUGANT #.posar(TIPUS_CASELLA_JUGANT)
                     acc = self.accions_previes[:]
                     acc.append((Accio.POSAR, (i, j)))
                     nou_estat = Estat(self.mida, taulell, acc)
