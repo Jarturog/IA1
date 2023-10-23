@@ -168,14 +168,15 @@ class Estat:
         for i in range(filas):
             columnas = len(self.taulell[i])
             for j in range(columnas):
-                if self.taulell[i][j] == TipusCasella.LLIURE:
-                    taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
-                    taulell[i][j] = CASELLA_JUGADOR #.posar(TIPUS_CASELLA_JUGANT)
-                    acc = self.accions_previes[:]
-                    acc.append((Accio.POSAR, (i, j)))
-                    nou_estat = Estat(self.mida, taulell, acc)
-                    if nou_estat.legal()[0]:
-                        estats_generats.append(nou_estat)
+                if self.taulell[i][j] != TipusCasella.LLIURE:
+                    continue
+                taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
+                taulell[i][j] = CASELLA_JUGADOR #.posar(TIPUS_CASELLA_JUGANT)
+                acc = self.accions_previes[:]
+                acc.append((Accio.POSAR, (i, j)))
+                nou_estat = Estat(self.mida, taulell, acc)
+                if nou_estat.legal()[0]:
+                    estats_generats.append(nou_estat)
         return estats_generats
 
     def __str__(self):
