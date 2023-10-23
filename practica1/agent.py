@@ -32,28 +32,28 @@ class Agent(joc.Agent):
 
 class Estat:
     
-    def __init__(self, mida, taula, accions_previes=None):
+    def __init__(self, mida, taulell, accions_previes=None):
         if accions_previes is None:
             accions_previes = []
         self.accions_previes = accions_previes
-        self.taula = taula
+        self.taulell = taulell
         self.mida = mida
         self.heuristica = self.calcHeuristica()
 
     def __eq__(self, other):
         """Overrides the default implementation"""
-        return self.taula == other.taula
+        return self.taulell == other.taulell
     
     def __lt__(self, other):
         """Overrides the default implementation"""
-        return self.taula < other.taula
+        return self.taulell < other.taulell
     
     def __le__(self, other):
         """Overrides the default implementation"""
-        return self.taula <= other.taula
+        return self.taulell <= other.taulell
     
     def __hash__(self):
-        return hash(tuple(tuple(fila) for fila in self.taula))
+        return hash(tuple(tuple(fila) for fila in self.taulell))
     
     def calcHeuristica(self) -> int:
         """
@@ -64,14 +64,14 @@ class Estat:
             por lo tanto máximo es (1+8*3)*2 para cada casilla y 0 como mínimo
         h = suma de todas las h_casilla
         """
-        taula = self.taula
-        filas = len(taula)
-        columnas = len(taula[0])
+        taulell = self.taulell
+        filas = len(taulell)
+        columnas = len(taulell[0])
         h = 0
 
         def check_casella(i, j):
             h_casilla = 0
-            casella = taula[i][j]
+            casella = taulell[i][j]
             if casella == CASILLA_LIBRE:
                 h_casilla += 1
             elif casella != CASILLA_GANADORA: # per tant és casella perdedora
@@ -84,7 +84,7 @@ class Estat:
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     if ind1 < 0 or ind2 < 0 or ind2 >= filas or ind1 >= columnas:
                         continue
-                    casella = taula[ind1][ind2]
+                    casella = taulell[ind1][ind2]
                     if casella == CASILLA_LIBRE:
                         h_casilla += 1
                     elif casella != CASILLA_GANADORA: # per tant és casella perdedora
@@ -92,7 +92,7 @@ class Estat:
             return h_casilla
 
         for i in range(filas):
-            columnas = len(taula[i])
+            columnas = len(taulell[i])
             for j in range(columnas):
                 h += check_casella(i, j)
         return h
@@ -105,35 +105,35 @@ class Estat:
         Returns:
             Missatge d'error o None en cas de que sigui legal
         """
-        taula = self.taula
+        taulell = self.taulell
         mida = self.mida
         if mida is None or not isinstance(mida, tuple) or len(mida) != 2:
             return False, "La mida hauria de ser una tupla de dos enters: " + mida
-        if taula is None or not isinstance(taula, tuple):
-            return False, "La taula hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
-        if len(taula) != mida[0]:
-            return False, "La taula i la mida no encaixen: " + len(taula) + " != " + str(mida[0])
-        for i in taula:
+        if taulell is None or not isinstance(taulell, tuple):
+            return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+        if len(taulell) != mida[0]:
+            return False, "La taulell i la mida no encaixen: " + len(taulell) + " != " + str(mida[0])
+        for i in taulell:
             if i is None or len(i) != mida[0]:
-                return False, "La taula hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
-            for j in taula[i]:
+                return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+            for j in taulell[i]:
                 if j is None:
-                    return False, "La taula hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
+                    return False, "La taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
         return True, None
 
     def es_meta(self) -> bool:
-        taula = self.taula
+        taulell = self.taulell
         def check_direccio(i, j, di, dj):
             for k in range(NUM_CASILLAS_PARA_GANAR):
-                if taula[i + (k * di)][j + (k * dj)] != CASILLA_GANADORA:
+                if taulell[i + (k * di)][j + (k * dj)] != CASILLA_GANADORA:
                     return False
             return True
         # Iterar a través de todas las celdas de la matriz
-        filas = len(taula)
+        filas = len(taulell)
         for i in range(filas):
-            columnas = len(taula[i])
+            columnas = len(taulell[i])
             for j in range(columnas):
-                if taula[i][j] == CASILLA_GANADORA:
+                if taulell[i][j] == CASILLA_GANADORA:
                     # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
                     for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
                         # Comprobar si es posible encontrar NUM_CASILLAS_PARA_GANAR casillas en esa dirección
@@ -154,22 +154,22 @@ class Estat:
         """
         estats_generats = []
         # Iterar a través de todas las celdas de la matriz
-        filas = len(self.taula)
+        filas = len(self.taulell)
         for i in range(filas):
-            columnas = len(self.taula[i])
+            columnas = len(self.taulell[i])
             for j in range(columnas):
-                if self.taula[i][j] == CASILLA_LIBRE:
-                    taula = [fila[:] for fila in self.taula] # copia de valores, no de referencia
-                    taula[i][j] = CASILLA_GANADORA #.posar(CASILLA_GANADORA)
+                if self.taulell[i][j] == CASILLA_LIBRE:
+                    taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
+                    taulell[i][j] = CASILLA_GANADORA #.posar(CASILLA_GANADORA)
                     acc = self.accions_previes[:]
                     acc.append((Accio.POSAR, (i, j)))
-                    nou_estat = Estat(self.mida, taula, acc)
+                    nou_estat = Estat(self.mida, taulell, acc)
                     if nou_estat.legal()[0]:
                         estats_generats.append(nou_estat)
         return estats_generats
 
     def __str__(self):
-        return (f"Taula: \"{self.taula}\" | Accio {self.accions_previes}")
+        return (f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}")
 
 
 
