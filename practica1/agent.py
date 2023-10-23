@@ -127,6 +127,8 @@ class Estat:
                     nCara += 1
                 elif j is TipusCasella.CREU:
                     nCreu += 1
+        if (nCreu - nCara) not in {-1, 0, 1}:
+            return False, "Error"
         return True, None
 
     def es_meta(self) -> bool:
