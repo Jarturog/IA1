@@ -102,6 +102,8 @@ class Estat:
 
         Un estat és legal si ...
 
+        NO SIRVE PARA NADA-PREGUNTAR
+
         Returns:
             Missatge d'error o None en cas de que sigui legal
         """
