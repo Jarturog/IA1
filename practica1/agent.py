@@ -32,12 +32,13 @@ class Agent(joc.Agent):
 
 class Estat:
     
-    def __init__(self, mida, taulell, accions_previes=None):
+    def __init__(self, mida, taulell, pes, accions_previes=None):
         if accions_previes is None:
             accions_previes = []
         self.accions_previes = accions_previes
         self.taulell = taulell
         self.mida = mida
+        self.pes = pes
         self.heuristica = self.calcHeuristica()
 
     def __eq__(self, other):

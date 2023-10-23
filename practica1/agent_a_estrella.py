@@ -14,12 +14,13 @@ class AgentAestrella(Agent):
     def actua(
             self, percepcio: Percepcio
     ) -> entorn.Accio | tuple[entorn.Accio, object]:
+
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell)
         if self.__accions is None:
             self.cerca(estat_inicial)
-        if len(self.__accions) <= 0:
+        if len(self.__accions) == 0:
             return Accio.ESPERAR
         accio = self.__accions.pop(-1)
         return Accio.POSAR, accio
