@@ -97,41 +97,16 @@ class Estat:
                 h += check_casella(i, j)
         return h
     
-    def legal(self) -> (bool, str):
-        """ Mètode per detectar si un estat és legal.
+    def legal(self, accio) -> (bool, str):
+        """ Mètode per detectar si una acció és legal.
 
         Un estat és legal si ...
 
-        NO SIRVE PARA NADA-PREGUNTAR
-
         Returns:
-            Missatge d'error o None en cas de que sigui legal
+            true si l'acció es legal
         """
-        nCreu = 0
-        nCara = 0
-        taulell = self.taulell
-        mida = self.mida
-        if mida is None or not isinstance(mida, tuple) or len(mida) != 2:
-            return False, "La mida hauria de ser una tupla de dos enters: " + mida
-        if taulell is None or not isinstance(taulell, tuple):
-            return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
-        if len(taulell) != mida[0]:
-            return False, "El taulell i la mida no encaixen: " + len(taulell) + " != " + str(mida[0])
-        for i in taulell:
-            if i is None or len(i) != mida[1]:
-                return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
-            for j in taulell[i]:
-                if j is None:
-                    return False, "El taulell hauria de ser una llista de " + str(mida[0]) + " llistes de " + str(mida[1]) + " caselles"
-                if j is not TipusCasella:
-                    return False, "Error casella"
-                if j is TipusCasella.CARA:
-                    nCara += 1
-                elif j is TipusCasella.CREU:
-                    nCreu += 1
-        if (nCreu - nCara) not in {-1, 0, 1}:
-            return False, "Error"
-        return True, None
+        return self.taulell[accio[0]][accio[1]] == TipusCasella.LLIURE
+        
 
     def es_meta(self) -> bool:
         taulell = self.taulell
