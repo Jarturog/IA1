@@ -72,7 +72,7 @@ class Estat:
                 h += check_casella(i, j)
         return h
     
-    def legal(self, accio) -> (bool, str):
+    def legal(self, accio) -> bool:
         """ Mètode per detectar si una acció és legal.
 
         Returns:
@@ -120,7 +120,7 @@ class Estat:
             columnas = len(self.taulell[i])
             for j in range(columnas):
                 acc_actual = (Accio.POSAR, (i, j))
-                if not self.legal(acc_actual):
+                if not self.legal(acc_actual[1]):
                     continue
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
