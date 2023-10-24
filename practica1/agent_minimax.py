@@ -27,7 +27,7 @@ class AgentMiniMaxAlfaBeta(Agent):
     def cerca(self, inicial):
         """
         todavía por hacer
-        """
+
         self.__oberts = PriorityQueue()
         self.__oberts.put((inicial.heuristica + inicial.pes, inicial))
         self.__tancats = set()
@@ -46,3 +46,6 @@ class AgentMiniMaxAlfaBeta(Agent):
                 ja_descobert = any(s.__eq__(sObert[1]) for sObert in self.__oberts.queue)
                 if not ja_descobert:
                     self.__oberts.put((s.heuristica + s.pes, s))
+     """
+    def alfabeta(self):
+        pass
