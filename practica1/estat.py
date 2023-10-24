@@ -29,50 +29,68 @@ class Estat:
     
     def __hash__(self):
         return hash(tuple(tuple(fila) for fila in self.taulell))
-    
+
     def calcHeuristica(self) -> int:
         """
         h = suma de todas las h_casilla
-        h_casilla = para cada 3 casillas adyacentas (8 direcciones):
-            +0 por cada casilla del jugador,
-            +1 por cada casilla libre,
-            +2 por cada casilla del contrincante
-            por lo tanto máximo es (1+8*3)*2 para cada casilla y 0 como mínimo
+        hay que tener en cuenta el ataque y la defensa:
+            -si estamos cerca de ganar priorizar la victoria
+            -si no estamos cerca de ganar y el oponente si, priorizar el bloqueo del contrincante
+
         """
         taulell = self.taulell
-        filas = len(taulell)
-        columnas = len(taulell[0])
+        n = len(taulell)  # longitud filas = longitud columnas (nxn)
         h = 0
 
         def check_casella(i, j):
-            h_casilla = 0
+            h_casella = 0
             casella = taulell[i][j]
-            if casella == TipusCasella.LLIURE:
-                h_casilla += 1
-            elif casella != self.jugador: # per tant és casella perdedora
-                h_casilla += 2
-
-            direcciones = [(di, dj) for di in [-1, 0, 1] for dj in [-1, 0, 1] if di != 0 or dj != 0]
-
-            for di, dj in direcciones:
+            dirs = [(di, dj) for di in [-1, 0, 1] for dj in [-1, 0, 1] if di != 0 or dj != 0]
+            for di, dj in dirs:
                 for k in range(1, N_CASELLAS_PER_GUANYAR):
-                    ind1, ind2 = i + (k * di), j + (k * dj)
-                    if ind1 < 0 or ind2 < 0 or ind2 >= filas or ind1 >= columnas:
+                    idx1, idx2 = i + (k * di), j + (k * dj)
+                    if not self.index_valid(idx1, idx2, n): # evita accesos a posiciones fuera del tablero
                         continue
-                    casella = taulell[ind1][ind2]
+                    casella = taulell[idx1][idx2]
                     if casella == TipusCasella.LLIURE:
-                        h_casilla += 1
-                    elif casella != self.jugador: # per tant és casella perdedora
-                        h_casilla += 2
-            return h_casilla
+                        h_casella += 1.25
+                    elif casella == self.jugador:
+                        # ataque (ganar)
+                        if k == 1:
+                            h_casella += 0.5 # casilla ocupada por jugador  a 1 de distancia
+                        elif k == 2:
+                            h_casella += 1 # casilla ocupada por jugador  a 2 de distancia
+                        elif k == 3:
+                            h_casella += 2 # casilla ocupada por jugador  a 3 de distancia
+                    else:
+                        # defensa (no perder)
+                        if k == 1:      # el oponente esta a 1 casilla de distancia
+                            h_casella += 1.5
+                        elif k == 2:    # el oponente esta a 2 casillas de distancia
+                            h_casella += 3
+                        elif k == 3:       # el oponente esta a 3 casillas de distancia
+                            h_casella += 6
 
-        for i in range(filas):
+            if i in (n // 2 - 1, n // 2) and j in (n // 2 - 1, n // 2): # premia las casillas centrales
+                h_casella -= 0.25
+
+            return h_casella
+
+        for i in range(n):
             columnas = len(taulell[i])
-            for j in range(columnas):
+            for j in range(n):
                 h += check_casella(i, j)
         return h
-    
-    def legal(self, accio) -> (bool, str):
+
+    def index_valid(self, ind1, ind2, n):
+        return 0 <= ind1 < n and 0 <= ind2 < n
+
+    def evaluar_taulell(self, taulell):
+    # para calcular la h y que el codigo de calc heuristica no sea tan inmenso, pero puede no ser necesario
+        pass
+
+
+def legal(self, accio) -> (bool, str):
         """ Mètode per detectar si una acció és legal.
 
         Returns:
