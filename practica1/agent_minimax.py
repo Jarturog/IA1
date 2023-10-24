@@ -1,8 +1,7 @@
 from ia_2022.entorn import Percepcio
-from practica1 import joc, entorn
-from practica1.agent import Agent, Estat
+from practica1.agent import Agent
+from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR
-from queue import PriorityQueue
 
 class AgentMiniMaxAlfaBeta(Agent):
     def __init__(self, nom):
@@ -13,7 +12,7 @@ class AgentMiniMaxAlfaBeta(Agent):
 
     def actua(
             self, percepcio: Percepcio
-    ) -> entorn.Accio | tuple[entorn.Accio, object]:
+    ) -> Accio | tuple[Accio, object]:
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell,0)

@@ -84,8 +84,9 @@ class Estat:
     def es_meta(self) -> bool:
         taulell = self.taulell
         def check_direccio(i, j, di, dj):
-            for k in range(N_CASELLAS_PER_GUANYAR):
-                if taulell[i + (k * di)][j + (k * dj)] != self.jugador:
+            casella = taulell[i][j]
+            for k in range(1, N_CASELLAS_PER_GUANYAR):
+                if taulell[i + (k * di)][j + (k * dj)] != casella: # si no és del mateix tipus
                     return False
             return True
         # Iterar a través de todas las celdas de la matriz
@@ -93,7 +94,7 @@ class Estat:
         for i in range(filas):
             columnas = len(taulell[i])
             for j in range(columnas):
-                if taulell[i][j] != self.jugador:
+                if taulell[i][j] == TipusCasella.LLIURE:
                     continue
                 # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
                 for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:

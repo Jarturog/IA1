@@ -1,6 +1,6 @@
 from ia_2022.entorn import Percepcio
-from practica1 import joc, entorn
-from practica1.agent import Agent, Estat
+from practica1.agent import Agent
+from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR
 
 class AgentProfunditat(Agent):
@@ -12,10 +12,10 @@ class AgentProfunditat(Agent):
 
     def actua(
             self, percepcio: Percepcio
-    ) -> entorn.Accio | tuple[entorn.Accio, object]:
+    ) -> Accio | tuple[Accio, object]:
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
-        estat_inicial = Estat(mida, taulell,0)
+        estat_inicial = Estat(mida, taulell,0, jugador=self.jugador)
         if self.__accions is None:
             self.cerca(estat_inicial)
         if len(self.__accions) <= 0:
