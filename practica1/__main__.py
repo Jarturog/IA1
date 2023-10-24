@@ -8,10 +8,9 @@ from agent_profunditat import AgentProfunditat
 
 
 def main():
-    #quatre = joc.Taulell([agent.Agent("Iker")]) # arturo y marta??? pq quatre?
+    #quatre = joc.Taulell([agent.Agent("Iker")])
     #a = joc.Taulell([AgentAestrella("Aestrella")])
-    #min = joc.Taulell([AgentMiniMaxAlfaBeta("Min")])
-    #max = joc.Taulell([AgentMiniMaxAlfaBeta("Max")])
+    #minimax = joc.Taulell([AgentMiniMaxAlfaBeta("Min"), AgentMiniMaxAlfaBeta("Max")])
     p = joc.Taulell([AgentProfunditat("Profunditat")])
     p.comencar()
     #quatre.comencar()
