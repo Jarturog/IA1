@@ -82,15 +82,18 @@ class Estat:
                 h += check_casella(i, j)
         return h
 
-    def index_valid(self, ind1, ind2, n):
-        return 0 <= ind1 < n and 0 <= ind2 < n
+
+    def index_valid(self, idx1, idx2, n)-> bool:
+        return 0 <= idx1 < n and 0 <= idx2 < n
 
     def evaluar_taulell(self, taulell):
     # para calcular la h y que el codigo de calc heuristica no sea tan inmenso, pero puede no ser necesario
         pass
 
 
-def legal(self, accio) -> (bool, str):
+
+    def legal(self, accio) -> bool:
+
         """ Mètode per detectar si una acció és legal.
 
         Returns:
@@ -138,7 +141,7 @@ def legal(self, accio) -> (bool, str):
             columnas = len(self.taulell[i])
             for j in range(columnas):
                 acc_actual = (Accio.POSAR, (i, j))
-                if not self.legal(acc_actual):
+                if not self.legal(acc_actual[1]):
                     continue
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
@@ -149,7 +152,7 @@ def legal(self, accio) -> (bool, str):
         return estats_generats
 
     def __str__(self):
-        return (f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}")
+        return f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}"
 
 
 
