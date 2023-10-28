@@ -36,10 +36,10 @@ class AgentAestrella(Agent):
                 break
             succ = estat.genera_fill()
             self.__tancats.add(estat)
-            for s in succ:
+            for s in succ: # for s in reversed(succ):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue
-                ja_descobert = any(s.__eq__(sObert) for sObert in self.__oberts)
+                ja_descobert = any(s.__eq__(sObert[1]) for sObert in self.__oberts.queue)
                 if not ja_descobert:
                     self.__oberts.put((s.heuristica + s.pes, s))

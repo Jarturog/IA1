@@ -38,7 +38,7 @@ class AgentMiniMaxAlfaBeta(Agent):
                 break
             succ = estat.genera_fill()
             self.__tancats.add(estat)
-            for s in succ:
+            for s in succ: # for s in reversed(succ):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue

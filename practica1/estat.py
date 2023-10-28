@@ -17,6 +17,7 @@ class Estat:
 
     def __eq__(self, other):
         """Overrides the default implementation"""
+        
         return self.taulell == other.taulell
     
     def __lt__(self, other):

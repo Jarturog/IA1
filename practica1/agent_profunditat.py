@@ -28,13 +28,13 @@ class AgentProfunditat(Agent):
         self.__tancats = set()
         self.__accions = []
         while len(self.__oberts) > 0:
-            estat = self.__oberts.pop(0)
+            estat = self.__oberts.pop(-1)
             if estat.es_meta():
                 self.__accions = estat.accions_previes[:]
                 break
             succ = estat.genera_fill()
             self.__tancats.add(estat)
-            for s in succ:
+            for s in reversed(succ):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue
