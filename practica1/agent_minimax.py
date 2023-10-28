@@ -15,12 +15,12 @@ class AgentMiniMaxAlfaBeta(Agent):
     ) -> Accio | tuple[Accio, object]:
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
-        estat_inicial = Estat(mida, taulell,0)
+        estat_inicial = Estat(mida, taulell, jugador=self.jugador)
         if self.__accions is None:
             self.cerca(estat_inicial)
         if len(self.__accions) <= 0:
             return Accio.ESPERAR
-        accio = self.__accions.pop(-1)
+        accio = self.__accions.pop(0)
         return Accio.POSAR, accio
     
     def cerca(self, inicial):

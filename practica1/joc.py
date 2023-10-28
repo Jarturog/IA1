@@ -130,7 +130,7 @@ class Taulell(joc.Joc):
         pos_x, pos_y = posicio
 
         horizontal_check = self.__linear_check(pos_x, pos_y, self.agent_actual)
-        vertical_check = self.__linear_check(pos_x, pos_y, self.agent_actual, reverse=True)
+        vertical_check = self.__linear_check(pos_y, pos_x, self.agent_actual, reverse=True)
 
         diagonal_check_tl = self.__diagonal_check(pos_x, pos_y, self.agent_actual, (+1, -1))
         diagonal_check_tr = self.__diagonal_check(pos_x, pos_y, self.agent_actual, (+1, +1))

@@ -15,12 +15,12 @@ class AgentProfunditat(Agent):
     ) -> Accio | tuple[Accio, object]:
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
-        estat_inicial = Estat(mida, taulell,0, jugador=self.jugador)
+        estat_inicial = Estat(mida, taulell, jugador=self.jugador)
         if self.__accions is None:
             self.cerca(estat_inicial)
         if len(self.__accions) <= 0:
             return Accio.ESPERAR
-        accio = self.__accions.pop(-1)
+        accio = self.__accions.pop(0)
         return Accio.POSAR, accio
     
     def cerca(self, inicial):
@@ -28,7 +28,7 @@ class AgentProfunditat(Agent):
         self.__tancats = set()
         self.__accions = []
         while len(self.__oberts) > 0:
-            estat = self.__oberts.pop()
+            estat = self.__oberts.pop(0)
             if estat.es_meta():
                 self.__accions = estat.accions_previes[:]
                 break

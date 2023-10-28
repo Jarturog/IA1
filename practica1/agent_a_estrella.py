@@ -14,17 +14,16 @@ class AgentAestrella(Agent):
     def actua(
             self, percepcio: Percepcio
     ) -> Accio | tuple[Accio, object]:
-
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
-        estat_inicial = Estat(mida, taulell,0)
+        estat_inicial = Estat(mida, taulell, jugador=self.jugador)
         if self.__accions is None:
             self.cerca(estat_inicial)
-        if len(self.__accions) == 0:
+        if len(self.__accions) <= 0:
             return Accio.ESPERAR
-        accio = self.__accions.pop(-1)
+        accio = self.__accions.pop(0)
         return Accio.POSAR, accio
-    
+
     def cerca(self, inicial):
         self.__oberts = PriorityQueue()
         self.__oberts.put((inicial.heuristica + inicial.pes, inicial))
@@ -41,6 +40,6 @@ class AgentAestrella(Agent):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue
-                ja_descobert = any(s.__eq__(sObert[1]) for sObert in self.__oberts.queue)
+                ja_descobert = any(s.__eq__(sObert) for sObert in self.__oberts)
                 if not ja_descobert:
                     self.__oberts.put((s.heuristica + s.pes, s))
