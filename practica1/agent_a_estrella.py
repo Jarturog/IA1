@@ -26,11 +26,11 @@ class AgentAestrella(Agent):
 
     def cerca(self, inicial):
         self.__oberts = PriorityQueue()
-        self.__oberts.put((inicial.heuristica + inicial.pes, inicial))
+        self.__oberts.put(inicial)
         self.__tancats = set()
         self.__accions = []
         while not self.__oberts.empty():
-            _, estat = self.__oberts.get()
+            estat = self.__oberts.get()
             if estat.es_meta():
                 self.__accions = estat.accions_previes[:]
                 break
@@ -40,6 +40,6 @@ class AgentAestrella(Agent):
                 ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
                 if ja_processat:
                     continue
-                ja_descobert = any(s.__eq__(sObert[1]) for sObert in self.__oberts.queue)
+                ja_descobert = any(s.__eq__(sObert) for sObert in self.__oberts.queue)
                 if not ja_descobert:
-                    self.__oberts.put((s.heuristica + s.pes, s))
+                    self.__oberts.put(s)

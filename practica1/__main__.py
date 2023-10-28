@@ -10,7 +10,7 @@ def main():
     #quatre = joc.Taulell([agent.Agent("Iker")])
     a = joc.Taulell([AgentAestrella("Aestrella")])
     #minimax = joc.Taulell([AgentMiniMaxAlfaBeta("Min"), AgentMiniMaxAlfaBeta("Max")])
-    #p = joc.Taulell([AgentProfunditat("Profunditat")])
+    #a = joc.Taulell([AgentProfunditat("Profunditat")])
     a.comencar()
     #quatre.comencar()
 

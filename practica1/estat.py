@@ -17,16 +17,11 @@ class Estat:
 
     def __eq__(self, other):
         """Overrides the default implementation"""
-        
         return self.taulell == other.taulell
     
     def __lt__(self, other):
         """Overrides the default implementation"""
-        return self.taulell < other.taulell
-    
-    def __le__(self, other):
-        """Overrides the default implementation"""
-        return self.taulell <= other.taulell
+        return self.heuristica + self.pes < other.heuristica + other.pes
     
     def __hash__(self):
         return hash(tuple(tuple(fila) for fila in self.taulell))
