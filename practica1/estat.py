@@ -45,27 +45,19 @@ class Estat:
             for di, dj in dirs:
                 for k in range(1, N_CASELLAS_PER_GUANYAR):
                     idx1, idx2 = i + (k * di), j + (k * dj)
-                    if not self.index_valid(idx1, idx2, n): # evita accesos a posiciones fuera del tablero
+                    if not self.index_valid(idx1, idx2): # evita accesos a posiciones fuera del tablero
                         continue
                     casella = taulell[idx1][idx2]
                     if casella == TipusCasella.LLIURE:
                         h_casella += 1.25
                     elif casella == self.jugador:
                         # ataque (ganar)
-                        if k == 1:
-                            h_casella += 0.5 # casilla ocupada por jugador  a 1 de distancia
-                        elif k == 2:
-                            h_casella += 1 # casilla ocupada por jugador  a 2 de distancia
-                        elif k == 3:
-                            h_casella += 2 # casilla ocupada por jugador  a 3 de distancia
+                        h_casella += 0.5 * (2 ** (k - 1))
+                        # donde k es el número de casillas desde la que se encuentra la ocupada por jugador
                     else:
                         # defensa (no perder)
-                        if k == 1:      # el oponente esta a 1 casilla de distancia
-                            h_casella += 1.5
-                        elif k == 2:    # el oponente esta a 2 casillas de distancia
-                            h_casella += 3
-                        elif k == 3:       # el oponente esta a 3 casillas de distancia
-                            h_casella += 6
+                        h_casella += 1.5 * (2 ** (k - 1))
+                        # donde k es el número de casillas en las que está el oponente
 
             if i in (n // 2 - 1, n // 2) and j in (n // 2 - 1, n // 2): # premia las casillas centrales
                 h_casella -= 0.25
@@ -79,18 +71,12 @@ class Estat:
         return h
 
 
-    def index_valid(self, idx1, idx2, n)-> bool:
-        return 0 <= idx1 < n and 0 <= idx2 < n
-
-    def evaluar_taulell(self, taulell):
-    # para calcular la h y que el codigo de calc heuristica no sea tan inmenso, pero puede no ser necesario
-        pass
-
-
+    def index_valid(self, i, j)-> bool:
+        return 0 <= i < self.mida[0] and 0 <= j < self.mida[1]
 
     def legal(self, accio) -> bool:
-
-        """ Mètode per detectar si una acció és legal.
+        """ 
+        Mètode per detectar si una acció és legal.
 
         Returns:
             true si l'acció es legal
@@ -99,6 +85,12 @@ class Estat:
         
 
     def es_meta(self) -> bool:
+        """ 
+        Mètode per evaluar si l'estat és final (qualque jugador guanya).
+
+        Returns:
+            true si un jugador ha guanyat
+        """
         taulell = self.taulell
         def check_direccio(i, j, di, dj):
             casella = taulell[i][j]
@@ -123,9 +115,8 @@ class Estat:
         return False  # Si no se encuentra ninguna línea ganadora en ninguna dirección, retornar False
 
     def genera_fill(self) -> list:
-        """ Mètode per generar els estats fills.
-
-        Genera tots els estats fill a partir de l'estat actual.
+        """
+        Mètode per generar els estats fills a partir de l'estat actual.
 
         Returns:
             Llista d'estats fills generats.
@@ -142,13 +133,20 @@ class Estat:
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
                 acc = self.accions_previes[:]
-                nou_estat = Estat(self.mida, taulell, self.incrementarPes(), acc, self.jugador)
+                nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=self.jugador)
+                nou_estat.pes = self.pes + nou_estat.calcular_cost()
                 nou_estat.accions_previes.append(acc_actual)
                 estats_generats.append(nou_estat)
         return estats_generats
     
-    def incrementarPes(self):
-        return self.pes + 1
+    def calcular_cost(self):
+        """
+        Mètode per calcular el cost de passar d'un estat a un altre.
+
+        Returns:
+            Cost enter de fer la transició cap a l'estat.
+        """
+        return 1 # no s'especifica, per tant es suposa 1
 
     def __str__(self):
         return f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}"
