@@ -28,48 +28,54 @@ class Estat:
 
     def calcHeuristica(self) -> int:
         """
-        h = suma de todas las h_casilla
-        ataque vs defensa:
-            -si estamos cerca de ganar priorizar la victoria
-            -si no estamos cerca de ganar y el oponente si, priorizar el bloqueo del contrincante
+        h = máximo valor posible menos suma de todas las h_casilla, donde cuanto mayor sea h_casilla mejor
 
+        Elige un valor para cada tipo de casilla, calcula todas las posibles filas, columnas y diagonales
+        con las que se puede ganar (4 casillas adyacentes en nuestro caso) y, para conseguir el valor máximo,
+        se supone que todas son del jugador. El cálculo de la heurística real es análogo pero sin la suposición
+        de que todas las casillas son las del jugador.
+
+        Returns:
+            Entero que cuanto más cerca esté del cero, más le conviene al agente elegir el estado.
         """
+        WEIGHT_JUGADOR = 8
+        WEIGHT_LLIURE = 4
+        WEIGHT_CONTRINCANT = 2
+        FILAS = self.mida[0]
+        COLUMNAS = self.mida[1]
+        N_FILAS = (FILAS - N_CASELLAS_PER_GUANYAR + 1) * COLUMNAS
+        N_COLUMNAS = (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1) * FILAS
+        N_DIAGONALES = 2 * (FILAS - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1)
+        MAX_VALUE_H = (N_FILAS + N_COLUMNAS + N_DIAGONALES) * WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR
+        
         taulell = self.taulell
-        n = len(taulell)  # longitud filas = longitud columnas (nxn)
-        h = 0
+        h_max = 0
+        direcciones = [(di, dj) for di in [0, 1] for dj in [0, 1] if di != 0 or dj != 0]
 
-        def check_casella(i, j):
+        def valorar_soluciones_casilla(i, j):
             h_casella = 0
-            casella = taulell[i][j]
-            dirs = [(di, dj) for di in [-1, 0, 1] for dj in [-1, 0, 1] if di != 0 or dj != 0]
-            for di, dj in dirs:
-                for k in range(1, N_CASELLAS_PER_GUANYAR):
-                    idx1, idx2 = i + (k * di), j + (k * dj)
-                    if not self.index_valid(idx1, idx2): # evita accesos a posiciones fuera del tablero
+            for di, dj in direcciones:
+                n_lliure = 0
+                n_jugador = 0
+                n_contrincant = 0
+                for k in range(N_CASELLAS_PER_GUANYAR):
+                    ind1, ind2 = i + (k * di), j + (k * dj)
+                    if not self.index_valid(ind1, ind2):
                         continue
-                    casella = taulell[idx1][idx2]
+                    casella = taulell[ind1][ind2]
                     if casella == TipusCasella.LLIURE:
-                        h_casella += 1.25
+                        n_lliure += 1
                     elif casella == self.jugador:
-                        # ataque (ganar)
-                        h_casella += 0.5 * (2 ** (k - 1))
-                        # donde k es el número de casillas desde la que se encuentra la ocupada por jugador
+                        n_jugador += 1
                     else:
-                        # defensa (no perder)
-                        h_casella += 1.5 * (2 ** (k - 1))
-                        # donde k es el número de casillas en las que está el oponente
-
-            if i in (n // 2 - 1, n // 2) and j in (n // 2 - 1, n // 2): # premia las casillas centrales
-                h_casella -= 0.25
-
+                        n_contrincant += 1
+                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador + WEIGHT_CONTRINCANT * n_contrincant
             return h_casella
 
-        for i in range(n):
-            columnas = len(taulell[i])
-            for j in range(n):
-                h += check_casella(i, j)
-        return h
-
+        for i in range(FILAS):
+            for j in range(COLUMNAS):
+                h_max += valorar_soluciones_casilla(i, j)
+        return MAX_VALUE_H - h_max
 
     def index_valid(self, i, j)-> bool:
         return 0 <= i < self.mida[0] and 0 <= j < self.mida[1]
