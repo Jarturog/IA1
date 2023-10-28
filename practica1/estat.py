@@ -33,7 +33,7 @@ class Estat:
     def calcHeuristica(self) -> int:
         """
         h = suma de todas las h_casilla
-        hay que tener en cuenta el ataque y la defensa:
+        ataque vs defensa:
             -si estamos cerca de ganar priorizar la victoria
             -si no estamos cerca de ganar y el oponente si, priorizar el bloqueo del contrincante
 
