@@ -140,16 +140,19 @@ class Estat:
         for i in range(filas):
             columnas = len(self.taulell[i])
             for j in range(columnas):
-                acc_actual = (Accio.POSAR, (i, j))
-                if not self.legal(acc_actual[1]):
+                acc_actual = i, j
+                if not self.legal(acc_actual):
                     continue
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
                 acc = self.accions_previes[:]
-                acc.append(acc_actual)
-                nou_estat = Estat(self.mida, taulell, acc)
+                nou_estat = Estat(self.mida, taulell, self.incrementarPes(), acc, self.jugador)
+                nou_estat.accions_previes.append(acc_actual)
                 estats_generats.append(nou_estat)
         return estats_generats
+    
+    def incrementarPes(self):
+        return self.pes + 1
 
     def __str__(self):
         return f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}"
