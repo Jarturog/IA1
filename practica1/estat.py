@@ -25,7 +25,7 @@ class Estat:
     def __hash__(self):
         return hash(tuple(tuple(fila) for fila in self.taulell))
 
-    def calcHeuristica(self) -> int:
+    def calcHeuristica(self) -> int: # not good
         """
         h = máximo valor posible menos suma de todas las h_casilla, donde cuanto mayor sea h_casilla mejor
 
