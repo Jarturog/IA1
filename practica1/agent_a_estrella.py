@@ -34,12 +34,8 @@ class AgentAestrella(Agent):
             if estat.es_meta():
                 self.__accions = estat.accions_previes[:]
                 break
-            succ = estat.genera_fill()
+            successors = estat.genera_fill()
             self.__tancats.add(estat)
-            for s in succ: # for s in reversed(succ):
-                ja_processat = any(s.__eq__(sTancat) for sTancat in self.__tancats)
-                if ja_processat:
-                    continue
-                ja_descobert = any(s.__eq__(sObert) for sObert in self.__oberts.queue)
-                if not ja_descobert:
+            for s in successors:
+                if s not in self.__tancats and s not in self.__oberts.queue: # if not (any(s.__eq__(sTancat) for sTancat in self.__tancats) or any(s.__eq__(sObert) for sObert in self.__oberts.queue)):
                     self.__oberts.put(s)
