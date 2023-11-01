@@ -13,6 +13,9 @@ class AgentProfunditat(Agent):
     def actua(
             self, percepcio: Percepcio
     ) -> Accio | tuple[Accio, object]:
+        """
+        Mitjançant una acció que cada vegada li acostarà més a la meta
+        """
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell, jugador=self.jugador)
@@ -24,16 +27,21 @@ class AgentProfunditat(Agent):
         return Accio.POSAR, accio
     
     def cerca(self, inicial):
+        """
+        Realitza una cerca no informada en profunditat
+        i una vegada triada la meta assigna les accions necessàries
+        a l'atribut corresponent de l'agent
+        """
         self.__oberts = [inicial]
         self.__tancats = set()
         self.__accions = []
-        while len(self.__oberts) > 0:
+        while len(self.__oberts) > 0: # mentre quedin estats per processar
             estat = self.__oberts.pop(-1)
             if estat.es_meta():
-                self.__accions = estat.accions_previes[:]
+                self.__accions = estat.accions_previes[:] # còpia les accions necessàries per arribar a la meta
                 break
             successors = estat.genera_fill()
             self.__tancats.add(estat)
-            for s in reversed(successors):
-                if s not in self.__tancats and s not in self.__oberts: # if not (any(s.__eq__(sTancat) for sTancat in self.__tancats) or any(s.__eq__(sObert) for sObert in self.__oberts)):
+            for s in reversed(successors): # processa els fills
+                if s not in self.__tancats and s not in self.__oberts: # si no s'ha processat i encara no s'ha visitat
                     self.__oberts.append(s)

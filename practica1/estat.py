@@ -6,13 +6,17 @@ N_CASELLAS_PER_GUANYAR = 4
 class Estat:
     
     def __init__(self, mida, taulell, accions_previes=None, jugador=None):
+        """
+        Un Estat té una mida (x, y), un taulell de x y dimensions, unes accions prèvies per arribar a l'estat,
+        un jugador el qual va fer la darrera acció i una heurística.
+        """
         if accions_previes is None:
             accions_previes = []
         self.accions_previes = accions_previes
         self.taulell = taulell
         self.mida = mida
         self.jugador = jugador
-        self.heuristica = self.calcHeuristica()
+        self.heuristica = self.calcular_heuristica()
 
     def __eq__(self, other):
         """Overrides the default implementation"""
@@ -25,17 +29,18 @@ class Estat:
     def __hash__(self):
         return hash(tuple(tuple(fila) for fila in self.taulell))
 
-    def calcHeuristica(self) -> int: # not good
+    def calcular_heuristica(self) -> int:
         """
-        h = máximo valor posible menos suma de todas las h_casilla, donde cuanto mayor sea h_casilla mejor
+        L'heurística final és un valor entre MAX_VALUE_H (valor positiu) i 0. Quant més petit sigui l'heurística millor.
 
-        Elige un valor para cada tipo de casilla, calcula todas las posibles filas, columnas y diagonales
-        con las que se puede ganar (4 casillas adyacentes en nuestro caso) y, para conseguir el valor máximo,
-        se supone que todas son del jugador. El cálculo de la heurística real es análogo pero sin la suposición
-        de que todas las casillas son las del jugador.
+        Primer calcula el màxim ...
+        Tria un valor per a cada tipus de casella, calcula totes les possibles files, columnes i diagonals
+        amb les quals es pot guanyar (4 caselles adjacents en el nostre cas) i, per a aconseguir el valor màxim,
+        se suposa que totes són del jugador. El càlcul de l'heurística real és anàleg però sense la suposició
+        que totes les caselles són les del jugador.
 
         Returns:
-            Entero que cuanto más cerca esté del cero, más le conviene al agente elegir el estado.
+        Sencer que com més a prop estigui del zero, més li convé a l'agent triar l'estat.
         """
         WEIGHT_JUGADOR = 4
         WEIGHT_LLIURE = 1
@@ -46,7 +51,9 @@ class Estat:
         N_FILAS = (FILAS - N_CASELLAS_PER_GUANYAR + 1) * COLUMNAS
         N_COLUMNAS = (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1) * FILAS
         N_DIAGONALES = 2 * (FILAS - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1)
-        MAX_VALUE_H = (N_FILAS + N_COLUMNAS + N_DIAGONALES) * WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR
+        N_POSIBLES_METAS = N_FILAS + N_COLUMNAS + N_DIAGONALES
+        MAX_VALUE_H = N_POSIBLES_METAS * (WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
+        MIN_VALUE_H = -N_POSIBLES_METAS * (WEIGHT_CONTRINCANT * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
         taulell = self.taulell
         h_max = 0
         direcciones = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
@@ -102,7 +109,8 @@ class Estat:
         for i in range(FILAS):
             for j in range(COLUMNAS):
                 h_max += valorar_soluciones_casilla(i, j)
-        return MAX_VALUE_H - h_max
+        h_normalizada = (h_max - MIN_VALUE_H) * MAX_VALUE_H / (MAX_VALUE_H - MIN_VALUE_H)
+        return MAX_VALUE_H - h_normalizada # normalizo el valor de h_max para volverlo un número natural
 
     def index_valid(self, i, j)-> bool:
         return 0 <= i < self.mida[0] and 0 <= j < self.mida[1]

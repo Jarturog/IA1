@@ -14,6 +14,9 @@ class AgentAestrella(Agent):
     def actua(
             self, percepcio: Percepcio
     ) -> Accio | tuple[Accio, object]:
+        """
+        Mitjançant una heurística tria la millor acció possible
+        """
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell, jugador=self.jugador)
@@ -25,17 +28,22 @@ class AgentAestrella(Agent):
         return Accio.POSAR, accio
 
     def cerca(self, inicial):
+        """
+        Realitza la cerca informada d'A* sense pes (Greedy)
+        i una vegada triada la meta assigna les accions necessàries
+        a l'atribut corresponent de l'agent
+        """
         self.__oberts = PriorityQueue()
         self.__oberts.put(inicial)
         self.__tancats = set()
         self.__accions = []
-        while not self.__oberts.empty():
-            estat = self.__oberts.get()
+        while not self.__oberts.empty(): # mentre quedin estats per processar
+            estat = self.__oberts.get() # selecciona l'estat obert amb menor heurística
             if estat.es_meta():
                 self.__accions = estat.accions_previes[:]
                 break
             successors = estat.genera_fill()
             self.__tancats.add(estat)
             for s in successors:
-                if s not in self.__tancats and s not in self.__oberts.queue: # if not (any(s.__eq__(sTancat) for sTancat in self.__tancats) or any(s.__eq__(sObert) for sObert in self.__oberts.queue)):
+                if s not in self.__tancats and s not in self.__oberts.queue: # si no s'ha processat i encara no s'ha visitat
                     self.__oberts.put(s)
