@@ -53,22 +53,47 @@ class Estat:
         def valorar_soluciones_casilla(i, j):
             h_casella = 0
             for di, dj in direcciones:
-                n_lliure = 0
-                n_jugador = 0
-                n_contrincant = 0
+                n_lliure = n_jugador = n_contrincant = seguits_jugador = seguits_contrincant = 0
+                caselles_adjacents = (TipusCasella.LLIURE, 0)
                 ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                 if not self.index_valid(ind1, ind2):
                     continue
+
                 for k in range(N_CASELLAS_PER_GUANYAR):
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     casella = taulell[ind1][ind2]
                     if casella == TipusCasella.LLIURE:
                         n_lliure += 1
+                        if caselles_adjacents[0] == casella:
+                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
+                        elif caselles_adjacents[0] == self.jugador:
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                            caselles_adjacents = (casella, 1)
+                        else:
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                            caselles_adjacents = (casella, 1)
                     elif casella == self.jugador:
                         n_jugador += 1
+                        if caselles_adjacents[0] == casella: # si la anterior era esta, [1] al menos es 1
+                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
+                        elif caselles_adjacents[0] != TipusCasella.LLIURE:
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                            caselles_adjacents = (casella, 1)
+                        else:
+                            caselles_adjacents = (casella, 1)
                     else:
                         n_contrincant += 1
-                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador + WEIGHT_CONTRINCANT * n_contrincant
+                        if caselles_adjacents[0] == casella: # si la anterior era esta, [1] al menos es 1
+                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
+                        elif caselles_adjacents[0] != TipusCasella.LLIURE:
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                            caselles_adjacents = (casella, 1)
+                        else:
+                            caselles_adjacents = (casella, 1)
+
+
+                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * (n_jugador ** (seguits_jugador + 1)) - WEIGHT_CONTRINCANT * (n_contrincant ** (seguits_contrincant + 1))
+                # h_casella *= (seguits_jugador + 1) / (seguits_contrincant + 1)
             return h_casella
         for i in range(FILAS):
             for j in range(COLUMNAS):
@@ -118,13 +143,14 @@ class Estat:
                         return True  # Si se encuentra una línea ganadora, retornar True
         return False  # Si no se encuentra ninguna línea ganadora en ninguna dirección, retornar False
 
-    def genera_fill(self) -> list:
+    def genera_fill(self, canvia_turn=False) -> list:
         """
         Mètode per generar els estats fills a partir de l'estat actual.
 
         Returns:
             Llista d'estats fills generats.
         """
+        tipus_casella = (TipusCasella.CREU if self.jugador == TipusCasella.CARA else TipusCasella.CARA) if canvia_turn else self.jugador
         estats_generats = []
         # Iterar a través de todas las celdas de la matriz
         filas = len(self.taulell)
@@ -137,7 +163,7 @@ class Estat:
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
                 acc = self.accions_previes[:]
-                nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=self.jugador)
+                nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=tipus_casella)
                 nou_estat.accions_previes.append(acc_actual)
                 estats_generats.append(nou_estat)
         return estats_generats
