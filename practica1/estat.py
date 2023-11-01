@@ -61,36 +61,41 @@ class Estat:
                 for k in range(N_CASELLAS_PER_GUANYAR):
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     casella = taulell[ind1][ind2]
+                    # gestión del número total de casillas                    
                     if casella == TipusCasella.LLIURE:
                         n_lliure += 1
-                        if caselles_adjacents[0] == casella:
-                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
-                        elif caselles_adjacents[0] == self.jugador:
-                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
-                        else:
-                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
                     elif casella == self.jugador:
                         n_jugador += 1
-                        if caselles_adjacents[0] == casella: # si la anterior era esta, [1] al menos es 1
-                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
-                        elif caselles_adjacents[0] != TipusCasella.LLIURE:
-                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
-                        else:
-                            caselles_adjacents = (casella, 1)
-                        seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
                     else:
                         n_contrincant += 1
-                        if caselles_adjacents[0] == casella: # si la anterior era esta, [1] al menos es 1
-                            caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
-                        elif caselles_adjacents[0] != TipusCasella.LLIURE:
+                    # gestión de casillas adyacentes
+                    if casella == caselles_adjacents[0]: # si sigue la racha
+                        caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
+                        if casella == self.jugador: # del jugador
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                        elif casella != TipusCasella.LLIURE: # del contrincante
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                    elif caselles_adjacents[0] != TipusCasella.LLIURE: # si era la racha de algún jugador y ha sido parada
+                        if casella == self.jugador: # si ha sido parada por el jugador
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                            caselles_adjacents = (casella, 1)
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                        elif casella != TipusCasella.LLIURE: # si ha sido parada por el contrincante
                             seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
                             caselles_adjacents = (casella, 1)
-                        else:
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                        else: # si ha sido parada por una casilla libre
+                            if caselles_adjacents[0] == self.jugador: # ha parado al jugador
+                                seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                            else: # ha parado al contrincante
+                                seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
                             caselles_adjacents = (casella, 1)
-                        seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                    else: # si era la racha casillas libres y ha sido parada
+                        caselles_adjacents = (casella, 1)
+                        if casella == self.jugador: # si ha sido parada por el jugador
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
+                        else: # si ha sido parada por el contrincante
+                            seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
                 h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
                 h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
             return h_casella
