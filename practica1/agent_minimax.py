@@ -82,7 +82,7 @@ class AgentMiniMaxAlfaBeta(Agent):
         return Accio.ESPERAR if self.__accions is None else (Accio.POSAR, self.__accions)
 
     def processar_node(self, nodo):
-        successors = nodo.estat.genera_fill(canvia_turn=True)
+        successors = nodo.estat.genera_fill(canvia_torn=True)
         for s in reversed(successors):
             if s in self.__tancats or s in self.__oberts:
                 break

@@ -33,86 +33,114 @@ class Estat:
         """
         L'heurística final és un valor entre MAX_VALUE_H (valor positiu) i 0. Quant més petit sigui l'heurística millor.
 
-        Primer calcula el màxim ...
-        Tria un valor per a cada tipus de casella, calcula totes les possibles files, columnes i diagonals
-        amb les quals es pot guanyar (4 caselles adjacents en el nostre cas) i, per a aconseguir el valor màxim,
-        se suposa que totes són del jugador. El càlcul de l'heurística real és anàleg però sense la suposició
-        que totes les caselles són les del jugador.
+        Primer calcula el màxim i el mínim possible de l'heurística per després normalitzar el valor final i que no sigui
+        un valor negatiu (com ho és el mínim).
+
+        Calcula el valor de totes les caselles, les suma, normalitza el resultat i el resta el màxim per a què quant més
+        petita sigui l'heurística millor l'estat
 
         Returns:
-        Sencer que com més a prop estigui del zero, més li convé a l'agent triar l'estat.
+            Nombre positiu que com més a prop estigui del zero, més li convé a l'agent triar l'estat.
         """
         WEIGHT_JUGADOR = 4
         WEIGHT_LLIURE = 1
         WEIGHT_CONTRINCANT = 5
         WEIGHT_ADJACENTS = 10
-        FILAS = self.mida[0]
-        COLUMNAS = self.mida[1]
-        N_FILAS = (FILAS - N_CASELLAS_PER_GUANYAR + 1) * COLUMNAS
-        N_COLUMNAS = (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1) * FILAS
-        N_DIAGONALES = 2 * (FILAS - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1)
-        N_POSIBLES_METAS = N_FILAS + N_COLUMNAS + N_DIAGONALES
+        FILES = self.mida[0]
+        COLUMNES = self.mida[1]
+        N_FILES = (FILES - N_CASELLAS_PER_GUANYAR + 1) * COLUMNES
+        N_COLUMNES = (COLUMNES - N_CASELLAS_PER_GUANYAR + 1) * FILES
+        N_DIAGONALS = 2 * (FILES - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNES - N_CASELLAS_PER_GUANYAR + 1)
+        N_POSIBLES_METAS = N_FILES + N_COLUMNES + N_DIAGONALS # conjunt de totes les possibles combinacions per guanyar
         MAX_VALUE_H = N_POSIBLES_METAS * (WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
         MIN_VALUE_H = -N_POSIBLES_METAS * (WEIGHT_CONTRINCANT * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
         taulell = self.taulell
-        h_max = 0
-        direcciones = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
-        def valorar_soluciones_casilla(i, j):
-            h_casella = 0
-            for di, dj in direcciones:
+        h = 0 # acumulador creixent de h_caselles
+        direccions = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
+        # direccions = [(-1, 1), (0, 1), (1, 0), (1, 1)] que són dos diagonals i les direccions vertical i horitzontal
+        def valorar_solucions_casella(i, j):
+            """
+            Puntua cada casella per les combinacions que pot realitzar amb les caselles a les direccions indicades
+
+            Returns:
+                Puntuació que quant més gran sigui millor
+            """
+            h_casella = 0 # acumulador de valoracions des de aquesta casella
+            for di, dj in direccions: # dj és la direcció de l'índex j i di la de l'índex i
+                # s'inicialitzen el nombre de caselles i caselles consecutives a 0
                 n_lliure = n_jugador = n_contrincant = seguits_jugador = seguits_contrincant = 0
-                caselles_adjacents = (TipusCasella.LLIURE, 0)
+                # s'inicialitza el registre de les caselles que han estat adjacents com 0 i amb una lliure
+                caselles_adjacents = (TipusCasella.LLIURE, 0) 
                 ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
-                if not self.index_valid(ind1, ind2):
+                # si es voldrà arribar a una casella fora del taulell passa a la següent direcció
+                if not self.index_valid(ind1, ind2): 
                     continue
-                for k in range(N_CASELLAS_PER_GUANYAR):
+                for k in range(N_CASELLAS_PER_GUANYAR): # comprova cada casella d'aquesta direcció (di, dj)
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     casella = taulell[ind1][ind2]
-                    # gestión del número total de casillas                    
+                    # gestió del nombre total de caselles                    
                     if casella == TipusCasella.LLIURE:
                         n_lliure += 1
                     elif casella == self.jugador:
                         n_jugador += 1
                     else:
                         n_contrincant += 1
-                    # gestión de casillas adyacentes
-                    if casella == caselles_adjacents[0]: # si sigue la racha
-                        caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1)
-                        if casella == self.jugador: # del jugador
-                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                        elif casella != TipusCasella.LLIURE: # del contrincante
+                    # gestió de caselles adjacents
+                    if casella == caselles_adjacents[0]: # si la casella actual és del mateix tipus que l'anterior
+                        caselles_adjacents = (caselles_adjacents[0], caselles_adjacents[1] + 1) # incrementa el nombre d'adjacents
+                        if casella == self.jugador: # si la casella és la del jugador
+                            # actualitza la quantitat màxima de caselles del seu tipus consecutives.
+                            # si ja es tenia un conjunt de consecutives (seguits_jugador) major no es canvia,
+                            # però si les consecucions d'ara superen l'anterior llavors s'actualitza el valor amb caselles_adjacents[1]
+                            seguits_jugador = max(seguits_jugador, caselles_adjacents[1]) 
+                        elif casella != TipusCasella.LLIURE: # si és la del contrincant
+                            # actualitza la quantitat màxima de caselles del seu tipus consecutives
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                    elif caselles_adjacents[0] != TipusCasella.LLIURE: # si era la racha de algún jugador y ha sido parada
-                        if casella == self.jugador: # si ha sido parada por el jugador
+                    elif caselles_adjacents[0] != TipusCasella.LLIURE: # si la casella era de qualque jugador y ha estat interrompuda per altra
+                        if casella == self.jugador: # si el contrincant ha estat interromput pel jugador
+                            # actualitza la quantitat màxima de caselles del contrincant
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
+                            caselles_adjacents = (casella, 1) # inicialitza el registre amb una casella del seu tipus
+                            # i actualitza la quantitat màxima de caselles del seu tipus consecutives
                             seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                        elif casella != TipusCasella.LLIURE: # si ha sido parada por el contrincante
+                        elif casella != TipusCasella.LLIURE: # si el jugador ha estat interromput pel contrincant
+                            # actualitza la quantitat màxima de caselles del jugador
                             seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
+                            caselles_adjacents = (casella, 1) # inicialitza el registre amb una casella del seu tipus
+                            # i actualitza la quantitat màxima de caselles del seu tipus consecutives
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                        else: # si ha sido parada por una casilla libre
-                            if caselles_adjacents[0] == self.jugador: # ha parado al jugador
+                        else: # si ha estat interrompuda per una casella lliure
+                            if caselles_adjacents[0] == self.jugador: # si ha interromput al jugador
+                                # actualitza la quantitat màxima de caselles del jugador
                                 seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                            else: # ha parado al contrincante
+                            else: # si ha interromput al contrincant
+                                # actualitza la quantitat màxima de caselles del contrincant
                                 seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
-                            caselles_adjacents = (casella, 1)
-                    else: # si era la racha casillas libres y ha sido parada
-                        caselles_adjacents = (casella, 1)
-                        if casella == self.jugador: # si ha sido parada por el jugador
+                            caselles_adjacents = (casella, 1) # inicialitza el registre amb una casella lliure
+                    else: # si la casella era lliure i ha estat interrompuda per un dels dos jugadors
+                        caselles_adjacents = (casella, 1) # inicialitza el registre amb una casella del tipus del jugador que ha interromput
+                        if casella == self.jugador: # si ha estat el jugador
+                            # actualitza la quantitat màxima de caselles del jugador
                             seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
-                        else: # si ha sido parada por el contrincante
+                        else: # si ha estat el contrincant
+                            # actualitza la quantitat màxima de caselles del contrincant
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                # finalment aplica les càlculs de l'heurística i passa a la següent direcció
                 h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
                 h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
             return h_casella
-        for i in range(FILAS):
-            for j in range(COLUMNAS):
-                h_max += valorar_soluciones_casilla(i, j)
-        h_normalizada = (h_max - MIN_VALUE_H) * MAX_VALUE_H / (MAX_VALUE_H - MIN_VALUE_H)
-        return MAX_VALUE_H - h_normalizada # normalizo el valor de h_max para volverlo un número natural
+        # recorre tot el taulell
+        for i in range(FILES):
+            for j in range(COLUMNES):
+                h += valorar_solucions_casella(i, j)
+        h_normalitzada = (h - MIN_VALUE_H) * MAX_VALUE_H / (MAX_VALUE_H - MIN_VALUE_H)
+        return MAX_VALUE_H - h_normalitzada # normalitzo el valor d'h per tornar-lo en un nombre positiu
 
     def index_valid(self, i, j)-> bool:
+        """
+        Returns:
+            True si l'índex està dins el taulell
+        """
         return 0 <= i < self.mida[0] and 0 <= j < self.mida[1]
 
     def legal(self, accio) -> bool:
@@ -120,7 +148,7 @@ class Estat:
         Mètode per detectar si una acció és legal.
 
         Returns:
-            true si l'acció es legal
+            True si l'acció es legal, False si no
         """
         return self.taulell[accio[0]][accio[1]] == TipusCasella.LLIURE
         
@@ -130,57 +158,60 @@ class Estat:
         Mètode per evaluar si l'estat és final (qualque jugador guanya).
 
         Returns:
-            true si un jugador ha guanyat
+            True si un jugador ha guanyat
         """
         taulell = self.taulell
         def check_direccio(i, j, di, dj):
+            """
+            Comprova si en la direcció hi ha qualque casella diferent
+            """
             casella = taulell[i][j]
             for k in range(1, N_CASELLAS_PER_GUANYAR):
                 if taulell[i + (k * di)][j + (k * dj)] != casella: # si no és del mateix tipus
                     return False
             return True
-        # Iterar a través de todas las celdas de la matriz
-        filas = len(taulell)
-        for i in range(filas):
-            columnas = len(taulell[i])
-            for j in range(columnas):
-                if taulell[i][j] == TipusCasella.LLIURE:
+        # Recorregut de la matriu
+        for i in range(self.mida[0]):
+            for j in range(self.mida[1]):
+                if taulell[i][j] == TipusCasella.LLIURE: # si és lliure ningú ha guanyat amb aquesta casella
                     continue
-                # Verificar las cuatro direcciones posibles: horizontal, vertical, diagonal descendente y diagonal ascendente
+                # Verifica les quatre direccions possibles: horitzontal, vertical, diagonal descendent i diagonal ascendent
                 for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
-                    # Comprobar si es posible encontrar N_CASELLAS_PER_GUANYAR casillas en esa dirección
-                    if (0 <= i + (N_CASELLAS_PER_GUANYAR - 1) * di < filas and
-                        0 <= j + (N_CASELLAS_PER_GUANYAR - 1) * dj < columnas and
-                        check_direccio(i, j, di, dj)): # Utilizar la función auxiliar para verificar si hay una línea ganadora en esa dirección
-                        return True  # Si se encuentra una línea ganadora, retornar True
-        return False  # Si no se encuentra ninguna línea ganadora en ninguna dirección, retornar False
+                    # Comproba si és possible encontrar N_CASELLAS_PER_GUANYAR caselles en aquesta direcció
+                    ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
+                    if self.index_valid(ind1, ind2) and check_direccio(i, j, di, dj):
+                        return True # Si es troba una línia guanyadora, retorna True
+        return False # Si no es troba cap línia guanyadora en cap direcció, retorna False
 
-    def genera_fill(self, canvia_turn=False) -> list:
+    def genera_fill(self, canvia_torn=False) -> list:
         """
         Mètode per generar els estats fills a partir de l'estat actual.
 
         Returns:
             Llista d'estats fills generats.
         """
-        tipus_casella = (TipusCasella.CREU if self.jugador == TipusCasella.CARA else TipusCasella.CARA) if canvia_turn else self.jugador
+        # assigna el tipus de casella per l'estat fill com la del mateix jugador si no es vol canviar de torn
+        # si es vol canviar de torn s'assignarà el tipus de casella de l'altre jugador
+        tipus_casella = self.jugador if not canvia_torn else (TipusCasella.CREU if self.jugador == TipusCasella.CARA else TipusCasella.CARA)
         estats_generats = []
-        # Iterar a través de todas las celdas de la matriz
-        filas = len(self.taulell)
-        for i in range(filas):
-            columnas = len(self.taulell[i])
-            for j in range(columnas):
-                acc_actual = i, j
-                if not self.legal(acc_actual):
+        # S'itera a través de tota la matriu
+        for i in range(self.mida[0]):
+            for j in range(self.mida[1]):
+                acc_actual = i, j # acció actual
+                if not self.legal(acc_actual): # si no és legal passa a la següent
                     continue
-                taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
-                taulell[i][j] = self.jugador
+                taulell = [fila[:] for fila in self.taulell] # còpia de valors, no de referència
+                taulell[i][j] = self.jugador # s'aplica l'acció
                 acc = self.accions_previes[:]
-                acc.append(acc_actual)
+                acc.append(acc_actual) # es plasma l'acció al registre d'accions prèvies
                 nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=tipus_casella)
-                estats_generats.append(nou_estat)
+                estats_generats.append(nou_estat) # es crea l'estat i s'afegeix
         return estats_generats
 
     def __str__(self):
+        """
+        Per tornar el taulell en un string
+        """
         return f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}"
 
 
