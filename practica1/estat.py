@@ -37,16 +37,16 @@ class Estat:
         Returns:
             Entero que cuanto más cerca esté del cero, más le conviene al agente elegir el estado.
         """
-        WEIGHT_JUGADOR = 8
-        WEIGHT_LLIURE = 4
-        WEIGHT_CONTRINCANT = 2
+        WEIGHT_JUGADOR = 4
+        WEIGHT_LLIURE = 1
+        WEIGHT_CONTRINCANT = 5
+        WEIGHT_ADJACENTS = 10
         FILAS = self.mida[0]
         COLUMNAS = self.mida[1]
         N_FILAS = (FILAS - N_CASELLAS_PER_GUANYAR + 1) * COLUMNAS
         N_COLUMNAS = (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1) * FILAS
         N_DIAGONALES = 2 * (FILAS - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNAS - N_CASELLAS_PER_GUANYAR + 1)
         MAX_VALUE_H = (N_FILAS + N_COLUMNAS + N_DIAGONALES) * WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR
-
         taulell = self.taulell
         h_max = 0
         direcciones = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
@@ -58,7 +58,6 @@ class Estat:
                 ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                 if not self.index_valid(ind1, ind2):
                     continue
-
                 for k in range(N_CASELLAS_PER_GUANYAR):
                     ind1, ind2 = i + (k * di), j + (k * dj)
                     casella = taulell[ind1][ind2]
@@ -81,6 +80,7 @@ class Estat:
                             caselles_adjacents = (casella, 1)
                         else:
                             caselles_adjacents = (casella, 1)
+                        seguits_jugador = max(seguits_jugador, caselles_adjacents[1])
                     else:
                         n_contrincant += 1
                         if caselles_adjacents[0] == casella: # si la anterior era esta, [1] al menos es 1
@@ -90,10 +90,9 @@ class Estat:
                             caselles_adjacents = (casella, 1)
                         else:
                             caselles_adjacents = (casella, 1)
-
-
-                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * (n_jugador ** (seguits_jugador + 1)) - WEIGHT_CONTRINCANT * (n_contrincant ** (seguits_contrincant + 1))
-                # h_casella *= (seguits_jugador + 1) / (seguits_contrincant + 1)
+                        seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
+                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
+                h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
             return h_casella
         for i in range(FILAS):
             for j in range(COLUMNAS):
@@ -163,8 +162,8 @@ class Estat:
                 taulell = [fila[:] for fila in self.taulell] # copia de valores, no de referencia
                 taulell[i][j] = self.jugador
                 acc = self.accions_previes[:]
+                acc.append(acc_actual)
                 nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=tipus_casella)
-                nou_estat.accions_previes.append(acc_actual)
                 estats_generats.append(nou_estat)
         return estats_generats
 
