@@ -153,12 +153,12 @@ class Estat:
         return self.taulell[accio[0]][accio[1]] == TipusCasella.LLIURE
         
 
-    def es_meta(self) -> bool:
+    def es_final(self) -> bool:
         """ 
-        Mètode per evaluar si l'estat és final (qualque jugador guanya).
+        Mètode per evaluar si l'estat és final (qualque jugador guanya o no es pot jugar més).
 
         Returns:
-            True si un jugador ha guanyat
+            True si un jugador ha guanyat o totes les caselles estan ocupades
         """
         taulell = self.taulell
         def check_direccio(i, j, di, dj):
@@ -170,10 +170,12 @@ class Estat:
                 if taulell[i + (k * di)][j + (k * dj)] != casella: # si no és del mateix tipus
                     return False
             return True
+        hi_ha_casella_lliure = False
         # Recorregut de la matriu
         for i in range(self.mida[0]):
             for j in range(self.mida[1]):
                 if taulell[i][j] == TipusCasella.LLIURE: # si és lliure ningú ha guanyat amb aquesta casella
+                    hi_ha_casella_lliure = True
                     continue
                 # Verifica les quatre direccions possibles: horitzontal, vertical, diagonal descendent i diagonal ascendent
                 for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
@@ -181,7 +183,8 @@ class Estat:
                     ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                     if self.index_valid(ind1, ind2) and check_direccio(i, j, di, dj):
                         return True # Si es troba una línia guanyadora, retorna True
-        return False # Si no es troba cap línia guanyadora en cap direcció, retorna False
+        # Si no es troba cap línia guanyadora en cap direcció i hi ha espai per posar, retorna False, si no hi ha espai retorna True
+        return False or not hi_ha_casella_lliure 
 
     def genera_fill(self, canvia_torn=False) -> list:
         """
