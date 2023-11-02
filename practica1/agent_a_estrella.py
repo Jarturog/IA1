@@ -39,7 +39,7 @@ class AgentAestrella(Agent):
         self.__accions = []
         while not self.__oberts.empty(): # mentre quedin estats per processar
             estat = self.__oberts.get() # selecciona l'estat obert amb menor heurística
-            if estat.es_meta():
+            if estat.es_final():
                 self.__accions = estat.accions_previes[:]
                 break
             successors = estat.genera_fill()
