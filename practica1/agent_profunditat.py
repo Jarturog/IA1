@@ -37,7 +37,7 @@ class AgentProfunditat(Agent):
         self.__accions = []
         while len(self.__oberts) > 0: # mentre quedin estats per processar
             estat = self.__oberts.pop(-1)
-            if estat.es_final():
+            if estat.es_final(es_meta=True):
                 self.__accions = estat.accions_previes[:] # còpia les accions necessàries per arribar a la meta
                 break
             successors = estat.genera_fill()

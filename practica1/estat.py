@@ -153,7 +153,7 @@ class Estat:
         return self.taulell[accio[0]][accio[1]] == TipusCasella.LLIURE
         
 
-    def es_final(self) -> bool:
+    def es_final(self, es_meta=False) -> bool:
         """ 
         Mètode per evaluar si l'estat és final (qualque jugador guanya o no es pot jugar més).
 
@@ -183,8 +183,10 @@ class Estat:
                     ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                     if self.index_valid(ind1, ind2) and check_direccio(i, j, di, dj):
                         return True # Si es troba una línia guanyadora, retorna True
-        # Si no es troba cap línia guanyadora en cap direcció i hi ha espai per posar, retorna False, si no hi ha espai retorna True
-        return False or not hi_ha_casella_lliure 
+        if es_meta: # Si no es troba cap línia guanyadora en cap direcció, hi ha espai per posar i es vol comprovar que es meta
+            return False # retorna false
+        else: # si només es vol comprovar que sigui final (ningú ha guanyat i encara hi ha espai) retorna aquest cas
+            return False or not hi_ha_casella_lliure 
 
     def genera_fill(self, canvia_torn=False) -> list:
         """
