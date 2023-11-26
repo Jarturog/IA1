@@ -4,6 +4,8 @@ from practica1.agent import Agent
 from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR
 
+DEBUG = True
+
 class AgentMiniMaxAlfaBeta(Agent):
     class Node:
         """
@@ -56,16 +58,17 @@ class AgentMiniMaxAlfaBeta(Agent):
             if self.valor is None:
                 self.valor = self.estat.heuristica
             TipusNode = AgentMiniMaxAlfaBeta.Node.TipusNode
-            es_max, es_min = self.pare.tipus == TipusNode.MAX, self.pare.tipus == TipusNode.MIN
+            pare = self.pare
+            es_max, es_min = pare.tipus == TipusNode.MAX, pare.tipus == TipusNode.MIN
             # si hi ha que canviar el valor del node
-            if self.pare.valor is None or (es_max and self.valor > self.pare.valor) or (es_min and self.valor < self.pare.valor):
-                self.pare.valor = self.valor
-                self.pare.darrera_accio = self.estat.accions_previes[-1]
+            if pare.valor is None or (es_max and self.valor > pare.valor) or (es_min and self.valor < pare.valor):
+                pare.valor = self.valor
+                pare.darrera_accio = self.estat.accions_previes[-1]
                 if es_max: # si és max canvia l'alfa
-                    self.pare.alfa = self.valor
+                    pare.alfa = self.valor
                 elif es_min: # si és min canvia la beta
-                    self.pare.beta = self.valor
-            self.pare.pruning = self.pare.alfa >= self.pare.beta
+                    pare.beta = self.valor
+            pare.pruning = pare.alfa >= pare.beta
         
     def __init__(self, nom, max_depth=float("+inf"), iteratiu=False):
         """
@@ -81,6 +84,8 @@ class AgentMiniMaxAlfaBeta(Agent):
     def actua(
             self, percepcio: Percepcio
     ) -> Accio | tuple[Accio, object]:
+        if DEBUG:
+            print(str(self.jugador).removeprefix("TipusCasella.") + " actua")
         taulell = percepcio[SENSOR.TAULELL]
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell, jugador=self.jugador)
@@ -97,35 +102,26 @@ class AgentMiniMaxAlfaBeta(Agent):
         Algorisme MiniMax recursiu. self.__accions només contindrà una acció
         """
         Node = AgentMiniMaxAlfaBeta.Node
-        # l'arrel és MIN perquè quant més petita sigui l'heurística millor és l'estat
-        arrel = Node(estat_inicial, (float("-inf"), float("+inf")), Node.TipusNode.MIN)
-        self.__oberts = []
-        self.__tancats = set()
-        self.__oberts.append(arrel.estat)
         def processar_node(node):
             """
             Mètode recursiu que processa cada node
             """
-            successors = node.estat.genera_fill(canvia_torn=True) # estats successors de l'estat del node
-            node.fills.extend( # torna els estats a la seva versió de nodes i els afegeix al node com successors d'ell
-                [Node(s, (node.alfa, node.beta), node.tipus.get_altre(), profunditat=node.profunditat + 1, pare=node)
-                for s in successors]
-            )
-            for i in range(len(successors)): # fa un recorregut dels fills del node
-                node_fill = node.fills[i]
+            self.__oberts.append(node.estat)
+            for s in node.estat.genera_fill(canvia_torn=True): # fa un recorregut dels fills del node
+                node_fill = Node(s, (node.alfa, node.beta), node.tipus.get_altre(), profunditat=node.profunditat + 1, pare=node)
                 if node_fill.estat in self.__tancats or node_fill.estat in self.__oberts: # si ja s'ha processat o està pendent de ser-lo
                     continue # passa a un altre fill
-                self.__oberts.append(node_fill.estat)
-                if node_fill.profunditat <= self.max_depth: # si està dins el rang de nodes a processar
+                if node_fill.profunditat <= self.max_depth:
                     processar_node(node_fill) # el processa a ell i als seus fills
-                else:
-                    self.__oberts.pop(-1) # si no es processa es treu dels estats oberts
-                    self.__tancats.add(node_fill.estat) # i s'afegeix com un estat tancat
                 node_fill.pujar_valor() # el fill intenta pujar el seu valor
                 if node.pruning: # si el nou valor ha causat una poda
                     break # es poda
-            self.__oberts.pop(-1) # quan ja s'han processat els seus fills es treu d'oberts
-            self.__tancats.add(node.estat) # i s'afegeix a tancats
+            self.__oberts.pop(-1) # si no es processa es treu dels estats oberts
+            self.__tancats.add(node.estat) # i s'afegeix com un estat tancat
+        # l'arrel és MIN perquè quant més petita sigui l'heurística millor és l'estat
+        arrel = Node(estat_inicial, (float("-inf"), float("+inf")), Node.TipusNode.MIN)
+        self.__oberts = []
+        self.__tancats = set()
         processar_node(arrel) # es processa l'arrel
         self.__accions = arrel.darrera_accio # s'assigna l'acció amb la que es pot arribar a l'estat òptim
 
