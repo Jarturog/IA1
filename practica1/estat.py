@@ -2,6 +2,11 @@
 from practica1.entorn import Accio, TipusCasella
 
 N_CASELLAS_PER_GUANYAR = 4
+WEIGHT_JUGADOR = 4
+WEIGHT_LLIURE = 1
+WEIGHT_CONTRINCANT = 5
+WEIGHT_ADJACENTS = 10
+DIRECCIONS = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
 
 class Estat:
     
@@ -42,22 +47,10 @@ class Estat:
         Returns:
             Nombre positiu que com més a prop estigui del zero, més li convé a l'agent triar l'estat.
         """
-        WEIGHT_JUGADOR = 4
-        WEIGHT_LLIURE = 1
-        WEIGHT_CONTRINCANT = 5
-        WEIGHT_ADJACENTS = 10
         FILES = self.mida[0]
         COLUMNES = self.mida[1]
-        N_FILES = (FILES - N_CASELLAS_PER_GUANYAR + 1) * COLUMNES
-        N_COLUMNES = (COLUMNES - N_CASELLAS_PER_GUANYAR + 1) * FILES
-        N_DIAGONALS = 2 * (FILES - N_CASELLAS_PER_GUANYAR + 1) * (COLUMNES - N_CASELLAS_PER_GUANYAR + 1)
-        N_POSIBLES_METAS = N_FILES + N_COLUMNES + N_DIAGONALS # conjunt de totes les possibles combinacions per guanyar
-        MAX_VALUE_H = N_POSIBLES_METAS * (WEIGHT_JUGADOR * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
-        MIN_VALUE_H = -N_POSIBLES_METAS * (WEIGHT_CONTRINCANT * N_CASELLAS_PER_GUANYAR + WEIGHT_ADJACENTS ** (N_CASELLAS_PER_GUANYAR - 1))
         taulell = self.taulell
         h = 0 # acumulador creixent de h_caselles
-        direccions = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
-        # direccions = [(-1, 1), (0, 1), (1, 0), (1, 1)] que són dos diagonals i les direccions vertical i horitzontal
         def valorar_solucions_casella(i, j):
             """
             Puntua cada casella per les combinacions que pot realitzar amb les caselles a les direccions indicades
@@ -66,7 +59,8 @@ class Estat:
                 Puntuació que quant més gran sigui millor
             """
             h_casella = 0 # acumulador de valoracions des de aquesta casella
-            for di, dj in direccions: # dj és la direcció de l'índex j i di la de l'índex i
+            # DIRECCIONS = [(-1, 1), (0, 1), (1, 0), (1, 1)] que són dos diagonals i les direccions vertical i horitzontal
+            for di, dj in DIRECCIONS: # dj és la direcció de l'índex j i di la de l'índex i
                 # s'inicialitzen el nombre de caselles i caselles consecutives a 0
                 n_lliure = n_jugador = n_contrincant = seguits_jugador = seguits_contrincant = 0
                 # s'inicialitza el registre de les caselles que han estat adjacents com 0 i amb una lliure
@@ -126,15 +120,22 @@ class Estat:
                             # actualitza la quantitat màxima de caselles del contrincant
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
                 # finalment aplica les càlculs de l'heurística i passa a la següent direcció
-                h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
-                h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
+                #h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
+                h_casella += 10 ** seguits_jugador - 10 ** seguits_contrincant
+                continue
+                n = 3
+                h_casella += int(n ** (seguits_jugador - 1)) - int(n ** (seguits_contrincant - 1))
+                if seguits_jugador >= N_CASELLAS_PER_GUANYAR:
+                    h_casella += 1000
+                elif seguits_contrincant >= N_CASELLAS_PER_GUANYAR:
+                    h_casella -= 1000
+                #h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
             return h_casella
         # recorre tot el taulell
         for i in range(FILES):
             for j in range(COLUMNES):
                 h += valorar_solucions_casella(i, j)
-        h_normalitzada = (h - MIN_VALUE_H) * MAX_VALUE_H / (MAX_VALUE_H - MIN_VALUE_H)
-        return MAX_VALUE_H - h_normalitzada # normalitzo el valor d'h per tornar-lo en un nombre positiu
+        return h
 
     def index_valid(self, i, j)-> bool:
         """
@@ -178,7 +179,7 @@ class Estat:
                     hi_ha_casella_lliure = True
                     continue
                 # Verifica les quatre direccions possibles: horitzontal, vertical, diagonal descendent i diagonal ascendent
-                for di, dj in [(0, 1), (1, 0), (1, 1), (1, -1)]:
+                for di, dj in DIRECCIONS:#[(0, 1), (1, 0), (1, 1), (1, -1)]:
                     # Comproba si és possible encontrar N_CASELLAS_PER_GUANYAR caselles en aquesta direcció
                     ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                     if self.index_valid(ind1, ind2) and check_direccio(i, j, di, dj):
