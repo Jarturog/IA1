@@ -2,11 +2,13 @@
 from practica1.entorn import Accio, TipusCasella
 
 N_CASELLAS_PER_GUANYAR = 4
+WEIGHT_GUANYAR = 10000
 WEIGHT_JUGADOR = 4
 WEIGHT_LLIURE = 1
-WEIGHT_CONTRINCANT = 5
+WEIGHT_CONTRINCANT = 4
 WEIGHT_ADJACENTS = 10
-DIRECCIONS = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
+DIRECCIONS = [(di, dj) for di in [-1, 0, 1] for dj in [-1, 0, 1] if not (di == 0 and dj == 0)]
+#DIRECCIONS = [(di, dj) for di in [-1, 0, 1] for dj in [0, 1] if not (di == 0 and dj == 0) and not (di == -1 and dj == 0)]
 
 class Estat:
     
@@ -36,16 +38,11 @@ class Estat:
 
     def calcular_heuristica(self) -> int:
         """
-        L'heurística final és un valor entre MAX_VALUE_H (valor positiu) i 0. Quant més petit sigui l'heurística millor.
 
-        Primer calcula el màxim i el mínim possible de l'heurística per després normalitzar el valor final i que no sigui
-        un valor negatiu (com ho és el mínim).
-
-        Calcula el valor de totes les caselles, les suma, normalitza el resultat i el resta el màxim per a què quant més
-        petita sigui l'heurística millor l'estat
+        Calcula el valor de totes les caselles i les suma
 
         Returns:
-            Nombre positiu que com més a prop estigui del zero, més li convé a l'agent triar l'estat.
+            Nombre positiu que com més gran sigui millor.
         """
         FILES = self.mida[0]
         COLUMNES = self.mida[1]
@@ -120,16 +117,12 @@ class Estat:
                             # actualitza la quantitat màxima de caselles del contrincant
                             seguits_contrincant = max(seguits_contrincant, caselles_adjacents[1])
                 # finalment aplica les càlculs de l'heurística i passa a la següent direcció
-                #h_casella += WEIGHT_LLIURE * n_lliure + WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
-                h_casella += 10 ** seguits_jugador - 10 ** seguits_contrincant
-                continue
-                n = 3
-                h_casella += int(n ** (seguits_jugador - 1)) - int(n ** (seguits_contrincant - 1))
-                if seguits_jugador >= N_CASELLAS_PER_GUANYAR:
-                    h_casella += 1000
-                elif seguits_contrincant >= N_CASELLAS_PER_GUANYAR:
-                    h_casella -= 1000
-                #h_casella += WEIGHT_ADJACENTS ** (seguits_jugador - 1) - (WEIGHT_ADJACENTS ** (seguits_contrincant - 1))
+                if n_jugador >= N_CASELLAS_PER_GUANYAR:
+                    h_casella += WEIGHT_GUANYAR
+                elif n_contrincant >= N_CASELLAS_PER_GUANYAR:
+                    h_casella -= WEIGHT_GUANYAR
+                h_casella += WEIGHT_JUGADOR * n_jugador - WEIGHT_CONTRINCANT * n_contrincant
+                h_casella += WEIGHT_ADJACENTS ** seguits_jugador - WEIGHT_ADJACENTS ** seguits_contrincant
             return h_casella
         # recorre tot el taulell
         for i in range(FILES):
@@ -180,7 +173,7 @@ class Estat:
                     continue
                 # Verifica les quatre direccions possibles: horitzontal, vertical, diagonal descendent i diagonal ascendent
                 for di, dj in DIRECCIONS:#[(0, 1), (1, 0), (1, 1), (1, -1)]:
-                    # Comproba si és possible encontrar N_CASELLAS_PER_GUANYAR caselles en aquesta direcció
+                    # Comprova si és possible encontrar N_CASELLAS_PER_GUANYAR caselles en aquesta direcció
                     ind1, ind2 = i + (N_CASELLAS_PER_GUANYAR - 1) * di, j + (N_CASELLAS_PER_GUANYAR - 1) * dj
                     if self.index_valid(ind1, ind2) and check_direccio(i, j, di, dj):
                         return True # Si es troba una línia guanyadora, retorna True
@@ -189,7 +182,7 @@ class Estat:
         else: # si només es vol comprovar que sigui final (ningú ha guanyat i encara hi ha espai) retorna aquest cas
             return False or not hi_ha_casella_lliure 
 
-    def genera_fill(self, canvia_torn=False) -> list:
+    def genera_fill(self, casella) -> list:
         """
         Mètode per generar els estats fills a partir de l'estat actual.
 
@@ -198,7 +191,6 @@ class Estat:
         """
         # assigna el tipus de casella per l'estat fill com la del mateix jugador si no es vol canviar de torn
         # si es vol canviar de torn s'assignarà el tipus de casella de l'altre jugador
-        tipus_casella = self.jugador if not canvia_torn else (TipusCasella.CREU if self.jugador == TipusCasella.CARA else TipusCasella.CARA)
         estats_generats = []
         # S'itera a través de tota la matriu
         for i in range(self.mida[0]):
@@ -207,10 +199,10 @@ class Estat:
                 if not self.legal(acc_actual): # si no és legal passa a la següent
                     continue
                 taulell = [fila[:] for fila in self.taulell] # còpia de valors, no de referència
-                taulell[i][j] = self.jugador # s'aplica l'acció
+                taulell[i][j] = casella # s'aplica l'acció
                 acc = self.accions_previes[:]
                 acc.append(acc_actual) # es plasma l'acció al registre d'accions prèvies
-                nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=tipus_casella)
+                nou_estat = Estat(self.mida, taulell, accions_previes=acc, jugador=self.jugador)
                 estats_generats.append(nou_estat) # es crea l'estat i s'afegeix
         return estats_generats
 
@@ -220,5 +212,14 @@ class Estat:
         """
         return f"taulell: \"{self.taulell}\" | Accio {self.accions_previes}"
 
+    def imprimir(self):
+        taulell_str = str(self)
+        taulell_str = taulell_str.replace("<TipusCasella.LLIURE: 0>", " ")
+        taulell_str = taulell_str.replace("<TipusCasella.CREU: 1>", "x")
+        taulell_str = taulell_str.replace("<TipusCasella.CARA: 2>", "o")
+        taulell_str = taulell_str.replace("], [", "\n")
+        taulell_str = taulell_str.removesuffix("]]\" | Accio []")
+        taulell_str = taulell_str.removeprefix("taulell: \"[[")
+        print(taulell_str)
 
 
