@@ -34,7 +34,7 @@ class AgentMiniMaxAlfaBeta(Agent):
         temps_cerca = end_time_cerca - start_time_cerca
 
         if DEBUG:
-            print(f"Temps de cerca: {temps_cerca} segundos")
+            print(f"Temps de cerca: {temps_cerca} s")
         if DEBUG:
             print(str(self.jugador).removeprefix("TipusCasella.") + " actua: " + str(self.__accions))
         return Accio.POSAR, self.__accions
