@@ -6,8 +6,8 @@ DEBUG = True
 
 def main():
     #agents = [AgentProfunditat("Profunditat")]
-    #agents = [AgentAestrella("Aestrella")]
-    agents = [AgentMiniMaxAlfaBeta("Jugador 1", 2), AgentMiniMaxAlfaBeta("Jugador 2", 2)]
+    agents = [AgentAestrella("Aestrella")]
+    #agents = [AgentMiniMaxAlfaBeta("Jugador 1", 2), AgentMiniMaxAlfaBeta("Jugador 2", 2)]
     quatre = joc.Taulell(agents)
     if DEBUG:
         print(str(agents[0].nom) + ": " + str(agents[0].jugador))

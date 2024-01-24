@@ -3,6 +3,7 @@ from ia_2022.entorn import Percepcio
 from practica1.agent import Agent
 from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR, TipusCasella
+import time
 DEBUG = True
 
 class AgentMiniMaxAlfaBeta(Agent):
@@ -27,7 +28,13 @@ class AgentMiniMaxAlfaBeta(Agent):
             return Accio.ESPERAR
         if DEBUG:
             estat_inicial.imprimir()
+            start_time_cerca = time.time()
         self.cerca_recursiva(estat_inicial)
+        end_time_cerca = time.time()
+        temps_cerca = end_time_cerca - start_time_cerca
+
+        if DEBUG:
+            print(f"Temps de cerca: {temps_cerca} segundos")
         if DEBUG:
             print(str(self.jugador).removeprefix("TipusCasella.") + " actua: " + str(self.__accions))
         return Accio.POSAR, self.__accions
@@ -84,7 +91,7 @@ def getOther(casella):
 
 def custom_move(movesCARA, movesCREU, jugador):
     """
-    mètode per realitzar moviments específics i per tant fer DEBUG més fàcilment
+    mètode per realitzar moviments específics i per tant fer DEBUG més fàcilment (no emprat pel funcionament)
     :returns: estat
     """
     s = 8
