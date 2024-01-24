@@ -10,8 +10,8 @@ def main():
     agents = [AgentMiniMaxAlfaBeta("Jugador 1", 2), AgentMiniMaxAlfaBeta("Jugador 2", 2)]
     quatre = joc.Taulell(agents)
     if DEBUG:
-        print(str(agents[0].nom) + ": " + str(agents[0].jugador))
-        print(str(agents[1].nom) + ": " + str(agents[1].jugador))
+        for a in agents:
+            print(str(a.nom) + ": " + str(a.jugador))
     quatre.comencar()
 
 if __name__ == "__main__":

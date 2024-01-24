@@ -31,7 +31,10 @@ class Estat:
     
     def __lt__(self, other):
         """Overrides the default implementation"""
-        return self.heuristica < other.heuristica
+        # és menor si el valor d'aquest és major a l'altre (està al revés, ho sabem)
+        # és per comparar quin és millor, PriorityQueue pensa que és millor el de menor valor, i com la nostra heurística
+        # és ascendent ho hem de girar:
+        return self.heuristica > other.heuristica
     
     def __hash__(self):
         return hash(tuple(tuple(fila) for fila in self.taulell))
@@ -182,7 +185,7 @@ class Estat:
         else: # si només es vol comprovar que sigui final (ningú ha guanyat i encara hi ha espai) retorna aquest cas
             return False or not hi_ha_casella_lliure 
 
-    def genera_fill(self, casella) -> list:
+    def genera_fill(self, casella=None) -> list:
         """
         Mètode per generar els estats fills a partir de l'estat actual.
 
@@ -192,6 +195,8 @@ class Estat:
         # assigna el tipus de casella per l'estat fill com la del mateix jugador si no es vol canviar de torn
         # si es vol canviar de torn s'assignarà el tipus de casella de l'altre jugador
         estats_generats = []
+        if casella is None:
+            casella = self.jugador
         # S'itera a través de tota la matriu
         for i in range(self.mida[0]):
             for j in range(self.mida[1]):
