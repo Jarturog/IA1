@@ -2,6 +2,8 @@ from ia_2022.entorn import Percepcio
 from practica1.agent import Agent
 from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR
+import time
+DEBUG = True
 
 class AgentProfunditat(Agent):
     def __init__(self, nom):
@@ -20,7 +22,13 @@ class AgentProfunditat(Agent):
         mida = percepcio[SENSOR.MIDA]
         estat_inicial = Estat(mida, taulell, jugador=self.jugador)
         if self.__accions is None:
+            start_time_cerca = time.time()
             self.cerca(estat_inicial)
+            end_time_cerca = time.time()
+            temps_cerca = end_time_cerca - start_time_cerca
+            if DEBUG:
+                print(f"Temps de cerca: {temps_cerca} s")
+                
         if len(self.__accions) <= 0:
             return Accio.ESPERAR
         accio = self.__accions.pop(0)
