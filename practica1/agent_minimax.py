@@ -5,6 +5,7 @@ from practica1.estat import Estat
 from practica1.entorn import Accio, SENSOR, TipusCasella
 import time
 DEBUG = True
+DEBUG_ELECCIONS = False
 
 class AgentMiniMaxAlfaBeta(Agent):
 
@@ -26,14 +27,14 @@ class AgentMiniMaxAlfaBeta(Agent):
         estat_inicial = Estat(mida, taulell, jugador=self.jugador)
         if self.max_depth <= 0 or estat_inicial.es_final(): # si no hi ha res que fer
             return Accio.ESPERAR
+        start_time_cerca = None
         if DEBUG:
             estat_inicial.imprimir()
-        start_time_cerca = time.time()
+            start_time_cerca = time.time()
         self.cerca(estat_inicial)
-        end_time_cerca = time.time()
-        temps_cerca = end_time_cerca - start_time_cerca
-
         if DEBUG:
+            end_time_cerca = time.time()
+            temps_cerca = end_time_cerca - start_time_cerca
             print(f"Temps de cerca: {temps_cerca} s")
             print(str(self.jugador).removeprefix("TipusCasella.") + " actua: " + str(self.__accions))
         return Accio.POSAR, self.__accions
@@ -58,7 +59,7 @@ class AgentMiniMaxAlfaBeta(Agent):
                 if (valor is None) or (es_max and v_subido > valor) or (not es_max and v_subido < valor):
                     valor = v_subido
                     if profunditat == 0:
-                        if DEBUG:
+                        if DEBUG_ELECCIONS:
                             print(str(s.accions_previes[0]) + ": " + str(valor))
                         self.__accions = s.accions_previes[0]
                     if es_max:  # si és max canvia l'alfa

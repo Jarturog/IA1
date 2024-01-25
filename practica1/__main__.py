@@ -5,8 +5,8 @@ from agent_profunditat import AgentProfunditat
 DEBUG = True
 
 def main():
-    #agents = [AgentProfunditat("Profunditat")]
-    #agents = [AgentAestrella("Aestrella")]
+    #agents = [AgentProfunditat("Primer en profunditat")]
+    #agents = [AgentAestrella("A*")]
     agents = [AgentMiniMaxAlfaBeta("Jugador 1", 2), AgentMiniMaxAlfaBeta("Jugador 2", 2)]
     quatre = joc.Taulell(agents)
     if DEBUG:
