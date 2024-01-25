@@ -29,7 +29,7 @@ class AgentMiniMaxAlfaBeta(Agent):
         if DEBUG:
             estat_inicial.imprimir()
         start_time_cerca = time.time()
-        self.cerca_recursiva(estat_inicial)
+        self.cerca(estat_inicial)
         end_time_cerca = time.time()
         temps_cerca = end_time_cerca - start_time_cerca
 
@@ -38,7 +38,7 @@ class AgentMiniMaxAlfaBeta(Agent):
             print(str(self.jugador).removeprefix("TipusCasella.") + " actua: " + str(self.__accions))
         return Accio.POSAR, self.__accions
 
-    def cerca_recursiva(self, estat_inicial):
+    def cerca(self, estat_inicial):
         """
         Algorisme MiniMax recursiu. self.__accions només contindrà una acció
         """
